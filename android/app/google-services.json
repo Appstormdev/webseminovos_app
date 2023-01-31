@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "834672013615",
+    "project_id": "beacon-7ffc1",
+    "storage_bucket": "beacon-7ffc1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:834672013615:android:38e04399762c93a37e31da",
+        "android_client_info": {
+          "package_name": "com.wsn.beacon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "834672013615-m0sjgvikml7f1lhefd6kn9j96p0hrap6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBen21gtme4zGRyvx_UDIDZxdG1RmhFvMI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "834672013615-m0sjgvikml7f1lhefd6kn9j96p0hrap6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "834672013615-bc36d0mu04uh37ghs6ejb3n8l916h6be.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "wsn.beacon1.apple"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
