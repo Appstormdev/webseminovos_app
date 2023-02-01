@@ -1,8 +1,8 @@
 import { Center, Heading, Image, VStack } from "native-base";
 
-import Container from "../components/Container";
+import Container from "@components/Container";
 
-import Logo from "../assets/wsn_logo.png";
+import Logo from "@assets/wsn_logo.png";
 import { Input } from "@components/Input";
 import { useState } from "react";
 import { Button } from "@components/Button";

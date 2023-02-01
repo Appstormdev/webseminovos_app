@@ -7,5 +7,5 @@ export const onlyLegalAge = () => {
 }
 
 export const formatDate = (date: Date) => {
-    return format(new Date(date), 'dd/MM/yyyy')
+   return (`${date.getUTCDate().toString().padStart(2, '0')}-${(date.getUTCMonth()+1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`);
 }

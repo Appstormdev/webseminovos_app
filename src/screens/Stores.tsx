@@ -1,7 +1,7 @@
 import { Center, Image, VStack, Text } from "native-base";
-import Container from "../components/Container";
+import Container from "@components/Container";
 
-import Logo from "../assets/wsn_logo.png";
+import Logo from "@assets/wsn_logo.png";
 
 export function Stores() {
   return (

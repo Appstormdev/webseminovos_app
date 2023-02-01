@@ -1,15 +1,26 @@
-import { Center, Heading } from "native-base";
+import { Center, Heading, HStack, Image } from "native-base";
 import { useState } from "react";
+import Logo from "@assets/wsn_logo.png";
 
 interface ScreenHeaderProps {
   title: string;
 }
 export function ScreenHeader({ title }: ScreenHeaderProps) {
   return (
-    <Center bg="blue.500" pb={6} pt={16}>
-      <Heading color="gray.100" fontSize="xl">
-        {title}
-      </Heading>
-    </Center>
+    <HStack bg="blue.500" pb={4} pt={12}>
+      <HStack flex={1} justifyContent="space-around" alignItems="center">
+        <Heading color="gray.100" fontSize="xl">
+          {title}
+        </Heading>
+
+        <Image
+          source={Logo}
+          alt="Logo da web semi novos"
+          w={20}
+          h={10}
+          resizeMode="contain"
+        />
+      </HStack>
+    </HStack>
   );
 }

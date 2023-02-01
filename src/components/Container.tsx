@@ -1,7 +1,7 @@
 import { View, ScrollView } from "native-base";
 import React, { ReactNode } from "react";
 import { ViewStyle, RefreshControl, Dimensions } from "react-native";
-import { BackgroundGradientImage } from "../Background";
+import { BackgroundGradientImage } from "./BackgroundGradientImage";
 interface IContainer {
   children: ReactNode;
   style?: ViewStyle;
@@ -20,7 +20,6 @@ const Container = React.forwardRef<any, IContainer>(
           ref={ref}
           contentContainerStyle={{
             flex: 1,
-            paddingBottom: 50,
             marginTop: hasHeader ? 0 : 50,
             ...style,
           }}

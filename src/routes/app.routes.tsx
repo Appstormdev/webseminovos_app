@@ -4,12 +4,16 @@ import {
   BottomTabNavigationProp,
 } from "@react-navigation/bottom-tabs";
 import { Icon, useTheme } from "native-base";
-import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
+import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
 
+import { Home } from "@screens/Home";
+import { PromoDetail } from "@screens/PromoDetail";
 import { Profile } from "@screens/Profile";
 import { Favorites } from "@screens/Favorites";
 
 type AppRoutes = {
+  home: undefined;
+  promoDetail: undefined;
   favorites: undefined;
   profile: undefined;
 };
@@ -38,9 +42,39 @@ export function AppRoutes() {
       }}
     >
       <Screen
+        name="home"
+        component={Home}
+        options={{
+          tabBarIcon: ({ color, focused }) =>
+            focused ? (
+              <Icon
+                as={Ionicons}
+                name="ios-home"
+                size={iconSize}
+                color={color}
+              />
+            ) : (
+              <Icon
+                as={Ionicons}
+                name="ios-home-outline"
+                size={iconSize}
+                color={color}
+              />
+            ),
+        }}
+      />
+
+      <Screen
+        name="promoDetail"
+        component={PromoDetail}
+        options={{
+          tabBarButton: () => null,
+        }}
+      />
+
+      <Screen
         name="favorites"
         component={Favorites}
-        navigationKey="favorites"
         options={{
           tabBarIcon: ({ color, focused }) =>
             focused ? (
@@ -60,6 +94,7 @@ export function AppRoutes() {
             ),
         }}
       />
+
       <Screen
         name="profile"
         component={Profile}

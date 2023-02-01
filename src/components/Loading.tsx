@@ -1,5 +1,5 @@
 import { Center, Spinner } from "native-base";
-import { BackgroundGradientImage } from "./Background";
+import { BackgroundGradientImage } from "./BackgroundGradientImage";
 
 export function Loading() {
   return (

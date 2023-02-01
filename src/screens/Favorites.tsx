@@ -1,8 +1,10 @@
 import { PromoCard } from "@components/PromoCard";
 import { ScreenHeader } from "@components/ScreenHeader";
+import { useNavigation } from "@react-navigation/native";
+import { AppNavigatorRoutesProps } from "@routes/app.routes";
 import { VStack, Box, Text, View } from "native-base";
 import { useState } from "react";
-import Container from "../components/Container";
+import Container from "@components/Container";
 
 type IPromoProps = {
   promoId: string;
@@ -12,6 +14,7 @@ type IPromoProps = {
 };
 
 export function Favorites() {
+  const navigation = useNavigation<AppNavigatorRoutesProps>();
   // const [favorites, setFavorites] = useState<IPromoProps[]>([]);
   const [favorites, setFavorites] = useState<IPromoProps[]>([
     {
@@ -37,6 +40,10 @@ export function Favorites() {
     },
   ]);
 
+  function handleOpenPromoCardDetail() {
+    navigation.navigate("promoDetail");
+  }
+
   return (
     <Container hasHeader>
       <VStack flex={1}>
@@ -56,6 +63,7 @@ export function Favorites() {
                 title={item.title}
                 description={item.description}
                 key={item.promoId}
+                onPress={handleOpenPromoCardDetail}
               />
             ))
           ) : (

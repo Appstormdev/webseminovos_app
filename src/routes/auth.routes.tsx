@@ -4,20 +4,20 @@ import {
 } from "@react-navigation/native-stack";
 import { Box } from "native-base";
 
-import { Home } from "@screens/Home";
 import { SignIn } from "@screens/SignIn";
 import { SignUp } from "@screens/SignUp";
 import { Stores } from "@screens/Stores";
 import { Welcome } from "@screens/Welcome";
+import { Offers } from "@screens/Offers";
 
-import { BackgroundGradientImage } from "@components/Background";
+import { BackgroundGradientImage } from "@components/BackgroundGradientImage";
 
 type AuthRoutes = {
   signIn: undefined;
   signUp: undefined;
-  home: undefined;
   stores: undefined;
   welcome: undefined;
+  offers: undefined;
 };
 
 export type AuthNavigatorRoutesProps = NativeStackNavigationProp<AuthRoutes>;
@@ -33,11 +33,11 @@ export function AuthRoutes() {
           headerShown: false,
         }}
       >
-        <Screen name="home" component={Home} />
+        <Screen name="welcome" component={Welcome} />
+        <Screen name="offers" component={Offers} />
         <Screen name="signIn" component={SignIn} />
         <Screen name="signUp" component={SignUp} />
         <Screen name="stores" component={Stores} />
-        <Screen name="welcome" component={Welcome} />
       </Navigator>
     </Box>
   );

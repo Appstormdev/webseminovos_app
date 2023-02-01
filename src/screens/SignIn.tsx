@@ -10,23 +10,29 @@ import {
 } from "native-base";
 import { Feather } from "@expo/vector-icons";
 
-import Container from "../components/Container";
+import Container from "@components/Container";
 
-import Logo from "../assets/wsn_logo.png";
+import Logo from "@assets/wsn_logo.png";
 import { Input } from "@components/Input";
 import { useState } from "react";
 import { Button } from "@components/Button";
 
 import { useNavigation } from "@react-navigation/native";
 import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
+import { AppNavigatorRoutesProps } from "@routes/app.routes";
 
 export function SignIn() {
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
+  const appNavigation = useNavigation<AppNavigatorRoutesProps>();
 
   const [securyPassword, setSecuryPassword] = useState<boolean>(true);
 
   const handleSignUpClick = () => {
     navigation.navigate("signUp");
+  };
+
+  const handleLogin = () => {
+    appNavigation.navigate("home");
   };
 
   return (
@@ -85,6 +91,7 @@ export function SignIn() {
             _pressed={{
               bg: "blue.400",
             }}
+            onPress={handleLogin}
           />
         </Center>
 

@@ -19,6 +19,8 @@ import CoverCar from "../assets/cover_car.png";
 import { Dimensions } from "react-native";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
+import { ScreenHeader } from "@components/ScreenHeader";
+import { ScreenHeaderAuth } from "@components/ScreenHeaderAuth";
 
 type IPromoProps = {
   promoId: string;
@@ -27,7 +29,7 @@ type IPromoProps = {
   imageUrl: string;
 };
 
-export function Home() {
+export function Offers() {
   const [promos, setPromos] = useState<IPromoProps[]>([
     {
       promoId: "0",
@@ -64,34 +66,6 @@ export function Home() {
       imageUrl:
         "https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
     },
-    {
-      promoId: "5",
-      title: "Chevrolet Onix 2017",
-      description: "Chevrolet Onyx 2017 1.0 Joy SPE/4",
-      imageUrl:
-        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    },
-    {
-      promoId: "6",
-      title: "Chevrolet Onix 2017",
-      description: "Chevrolet Onyx 2017 1.0 Joy SPE/4",
-      imageUrl:
-        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    },
-    {
-      promoId: "7",
-      title: "Chevrolet Onix 2017",
-      description: "Chevrolet Onyx 2017 1.0 Joy SPE/4",
-      imageUrl:
-        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    },
-    {
-      promoId: "8",
-      title: "Chevrolet Onix 2017",
-      description: "Chevrolet Onyx 2017 1.0 Joy SPE/4",
-      imageUrl:
-        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    },
   ]);
 
   const [newSearch, setNewSearch] = useState<string>();
@@ -105,7 +79,8 @@ export function Home() {
   return (
     <Container hasHeader>
       <VStack flex={1}>
-        <HomeHeader />
+        <ScreenHeaderAuth title="Ofertas" />
+
         <ScrollView mt={6}>
           <Image
             w="full"
