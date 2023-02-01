@@ -1,29 +1,33 @@
-import { View } from "react-native";
-import { StatusBar } from "expo-status-bar";
+import { StatusBar } from "react-native";
+import { NativeBaseProvider } from "native-base";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import {
   useFonts,
   Inter_400Regular,
-  Inter_600SemiBold,
   Inter_700Bold,
-  Inter_900Black,
 } from "@expo-google-fonts/inter";
 
 import { Routes } from "./src/routes";
+import { Loading } from "@components/Loading";
+import { THEME } from "./src/theme";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
-    Inter_600SemiBold,
     Inter_700Bold,
-    Inter_900Black,
   });
 
   return (
-    <SafeAreaProvider>
-      <StatusBar backgroundColor="transparent" translucent />
+    <NativeBaseProvider theme={THEME}>
+      <SafeAreaProvider>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor="transparent"
+          translucent
+        />
 
-      {fontsLoaded ? <Routes /> : null}
-    </SafeAreaProvider>
+        {fontsLoaded ? <Routes /> : <Loading />}
+      </SafeAreaProvider>
+    </NativeBaseProvider>
   );
 }
