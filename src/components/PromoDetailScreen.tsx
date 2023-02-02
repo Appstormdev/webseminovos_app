@@ -22,6 +22,8 @@ import { PromoCardDetailHeader } from "./PromoCardDetailHeader";
 import { PromoCardDetailTechnicalFeaturesField } from "./PromoCardDetailTechnicalFeaturesField";
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import { useOffers } from "@hooks/useOffers";
+import { useAuth } from "@hooks/useAuth";
+import { useEffect, useState } from "react";
 
 interface PromoDetailProps {
   onHandleGoBack: () => void;
@@ -32,6 +34,7 @@ export function PromoDetailScreen({
   onHandleGoBack,
   onHandleFavoring,
 }: PromoDetailProps) {
+  const { thisOfferIsFavorited } = useAuth();
   const { offer } = useOffers();
   const { colors } = useTheme();
 
@@ -44,13 +47,13 @@ export function PromoDetailScreen({
           </TouchableOpacity>
 
           <Heading color="gray.100" fontSize="md" fontFamily="heading">
-            {offer?.businessName}
+            {offer.businessName}
           </Heading>
         </HStack>
 
         <HStack justifyContent="space-between" alignItems="center" mb={2}>
           <Image
-            source={{ uri: offer?.businessLogo }}
+            source={{ uri: offer.businessLogo }}
             fallbackElement={<NotFoundedLogo />}
             alt="Imagem da logo da empresa"
             w="96px"
@@ -64,7 +67,7 @@ export function PromoDetailScreen({
           />
           <VStack flex={1} mb={2}>
             <Text color="gray.100" fontSize="2xs">
-              {offer?.businessFullAddress}
+              {offer.businessFullAddress}
             </Text>
           </VStack>
         </HStack>
@@ -75,7 +78,7 @@ export function PromoDetailScreen({
           <Box rounded="md" overflow="hidden" shadow={2}>
             <AspectRatio w="100%" ratio={16 / 9}>
               <Image
-                source={{ uri: offer?.carImage }}
+                source={{ uri: offer.carImage }}
                 fallbackElement={<NotFoundedCarImageCover />}
                 alt="Imagem do carro em oferta"
                 rounded="lg"
@@ -85,23 +88,21 @@ export function PromoDetailScreen({
           </Box>
           <Box bg="gray.100" mt={6} rounded="md" p={4}>
             <PromoCardDetailHeader
-              brand={offer?.carBrand || ""}
-              model={offer?.carModel || ""}
-              favorited={false}
+              brand={offer.carBrand || ""}
+              model={offer.carModel || ""}
+              favorited={thisOfferIsFavorited(offer.carId)}
               setFavorited={onHandleFavoring}
             />
-            <PromoCardDetailDescription
-              description={offer?.carDescription ? offer.carDescription : ""}
-            />
+            <PromoCardDetailDescription description={offer.carDescription} />
 
             <Box mt={4}>
               <Heading
                 color="blue.400"
                 fontWeight="black"
                 fontFamily="heading"
-                fontSize={offer?.carPrice ? "3xl" : "lg"}
+                fontSize={offer.carPrice ? "3xl" : "lg"}
               >
-                {offer?.carPrice
+                {offer.carPrice !== ""
                   ? formatPrice(offer.carPrice)
                   : "Consulte nosso atendentes"}
               </Heading>
@@ -114,27 +115,27 @@ export function PromoDetailScreen({
               <VStack mt={2}>
                 <PromoCardDetailTechnicalFeaturesField
                   label="Modelo:"
-                  value={offer?.carModel || "-"}
+                  value={offer.carModel || "-"}
                 />
                 <PromoCardDetailTechnicalFeaturesField
                   label="Marca:"
-                  value={offer?.carBrand || "-"}
+                  value={offer.carBrand || "-"}
                 />
                 <PromoCardDetailTechnicalFeaturesField
                   label="Ano:"
-                  value={offer?.carYear || "-"}
+                  value={offer.carYear || "-"}
                 />
                 <PromoCardDetailTechnicalFeaturesField
                   label="Motorização:"
-                  value={offer?.carEngine || "-"}
+                  value={offer.carEngine || "-"}
                 />
                 <PromoCardDetailTechnicalFeaturesField
                   label="Tipo de combústivel:"
-                  value={offer?.carFuelType || "-"}
+                  value={offer.carFuelType || "-"}
                 />
                 <PromoCardDetailTechnicalFeaturesField
                   label="Quilômetros:"
-                  value={offer?.carMileage || "-"}
+                  value={offer.carMileage || "-"}
                 />
               </VStack>
             </Box>
@@ -151,9 +152,9 @@ export function PromoDetailScreen({
             }}
             onPress={() =>
               callChatWhatsapp({
-                carId: offer?.carId || "",
-                carTitle: offer?.carTitle || "",
-                businessWhatsappNumber: offer?.businessWhatsappNumber || "",
+                carId: offer.carId || "",
+                carTitle: offer.carTitle || "",
+                businessWhatsappNumber: offer.businessWhatsappNumber || "",
               })
             }
             mt={4}
