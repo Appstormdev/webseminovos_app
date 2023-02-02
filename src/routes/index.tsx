@@ -6,7 +6,6 @@ import { useAuth } from "@hooks/useAuth";
 import { AuthRoutes } from "./auth.routes";
 import { AppRoutes } from "./app.routes";
 import { useEffect, useState } from "react";
-import { useOffers } from "@hooks/useOffers";
 
 const PERSISTENCE_KEY = "@wsnBeacon:NAVIGATION_STATE_V1";
 
