@@ -73,9 +73,15 @@ export function Profile() {
         const photoSizeInMb = photoInfo.size && photoInfo.size / 1024 / 1024;
         if (photoSizeInMb && photoSizeInMb > 2) {
           return toast.show({
-            title: "Essa imagem é muito grande. Escolha uma de até 2MB",
-            placement: "top-right",
+            title: "Essa imagem é muito grande.\n Escolha uma de até 2MB",
+            placement: "top",
             bgColor: "red.400",
+            _title: {
+              fontSize: "md",
+              fontWeight: "semibold",
+              paddingX: 8,
+              textAlign: "center",
+            },
           });
         }
         setUserPhoto(photoSelected.assets[0].uri);

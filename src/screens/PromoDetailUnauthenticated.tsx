@@ -24,8 +24,15 @@ export function PromoDetailUnauthenticated() {
   const handleFavoring = () => {
     toast.show({
       title: "Faça seu login ou crie uma conta para salvar seus favoritos!",
-      placement: "top-right",
-      bgColor: "green.600",
+      placement: "top",
+      bgColor: "blue.200",
+      _title: {
+        color: "gray.700",
+        fontSize: "md",
+        fontWeight: "semibold",
+        paddingX: 8,
+        textAlign: "center",
+      },
     });
     navigation.navigate("signIn");
   };
