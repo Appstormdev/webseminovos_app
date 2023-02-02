@@ -1,26 +1,34 @@
-import { useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
+import { useEffect } from "react";
+import { useToast } from "native-base";
 
 import { PromoDetailScreen } from "@components/PromoDetailScreen";
-import { AppNavigatorRoutesProps } from "@routes/app.routes";
+import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
 import { useOffers } from "@hooks/useOffers";
 
-export function PromoDetail() {
-  const navigation = useNavigation<AppNavigatorRoutesProps>();
+export function PromoDetailUnauthenticated() {
+  const navigation = useNavigation<AuthNavigatorRoutesProps>();
+
   const { selectedOffer, loadOffer, offer } = useOffers();
 
   useEffect(() => {
     loadOffer();
   }, [selectedOffer]);
 
+  const toast = useToast();
+
   const handleGoBack = () => {
     navigation.goBack();
   };
 
   const handleFavoring = () => {
-    console.info("Fazer");
+    toast.show({
+      title: "Faça seu login ou crie uma conta para salvar seus favoritos!",
+      placement: "top-right",
+      bgColor: "green.600",
+    });
+    navigation.navigate("signIn");
   };
-
   return (
     <PromoDetailScreen
       onHandleGoBack={() => handleGoBack()}
