@@ -22,30 +22,14 @@ import { ScreenHeader } from "@components/ScreenHeader";
 import { Select } from "@components/Select";
 import { UserPhoto } from "@components/UserPhoto";
 import { formatDate, onlyLegalAge } from "@utils/dateTools";
-
-type UserProps = {
-  name: string;
-  email: string;
-  phone: string;
-  born: string;
-  gender: string;
-};
+import { useAuth } from "@hooks/useAuth";
 
 export function Profile() {
+  const { user, handleChangeAvatar } = useAuth();
   const [photoIsLoading, setPhotoIsLoading] = useState<boolean>(false);
-  const [userPhoto, setUserPhoto] = useState<string>(
-    "https://github.com/rgranvilla.png"
-  );
+  const [userPhoto, setUserPhoto] = useState<string>(user?.avatarUrl || "");
 
   const toast = useToast();
-
-  const [user, setUser] = useState<UserProps>({
-    name: "Ricardo Granvilla Oliveira",
-    email: "rgranvilla@gmail.com",
-    phone: "51992051821",
-    born: "1981-05-05",
-    gender: "male",
-  });
 
   const [password, setPassword] = useState<string>();
 
@@ -59,10 +43,12 @@ export function Profile() {
   const maximumDate = onlyLegalAge();
 
   useEffect(() => {
-    setName(user.name);
-    setBornDate(new Date(user.born));
-    setGender(user.gender);
-    setPhone(user.phone);
+    if (user) {
+      setName(user.name);
+      setBornDate(new Date(user.born));
+      setGender(user.gender);
+      setPhone(user.phone);
+    }
   }, []);
 
   const handleUserPhotoSelect = async () => {
@@ -93,6 +79,7 @@ export function Profile() {
           });
         }
         setUserPhoto(photoSelected.assets[0].uri);
+        handleChangeAvatar(photoSelected.assets[0].uri);
       }
     } catch (error) {
       console.error(error);
@@ -139,7 +126,7 @@ export function Profile() {
 
             <Input
               label="Email"
-              value={user.email}
+              value={user?.email}
               isDisabled
               keyboardType="email-address"
               autoCapitalize="none"
