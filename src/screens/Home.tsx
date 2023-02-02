@@ -1,13 +1,5 @@
-import {
-  VStack,
-  Box,
-  ScrollView,
-  Image,
-  AspectRatio,
-  Heading,
-  Text,
-} from "native-base";
-import Container from "@components/Container";
+import { VStack, Box, ScrollView, Image, Heading, Text } from "native-base";
+import { Container } from "@components/Container";
 
 import { HomeHeader } from "@components/HomeHeader";
 import { PromoCard } from "@components/PromoCard";
@@ -16,7 +8,6 @@ import { useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "@routes/app.routes";
 
 import CoverCar from "../assets/cover_car.png";
-import { Dimensions } from "react-native";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 
@@ -103,7 +94,7 @@ export function Home() {
   }
 
   return (
-    <Container hasHeader>
+    <Container>
       <VStack flex={1}>
         <HomeHeader />
         <ScrollView mt={6}>
@@ -127,7 +118,7 @@ export function Home() {
           </Box>
 
           <VStack flex={1} mx={4} mb={8} mt={8}>
-            <Heading color="gray.100" size="sm">
+            <Heading color="gray.100" size="sm" fontFamily="heading">
               Ofertas localizadas
             </Heading>
             {promos.length > 0 && (

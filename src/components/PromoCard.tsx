@@ -38,7 +38,9 @@ export function PromoCard({
           resizeMode="cover"
         />
         <VStack flex={1}>
-          <Heading fontSize="lg">{title}</Heading>
+          <Heading fontSize="lg" fontFamily="heading">
+            {title}
+          </Heading>
           <Text mt={1} numberOfLines={2}>
             {description}
           </Text>

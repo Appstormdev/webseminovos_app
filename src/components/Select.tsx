@@ -2,29 +2,46 @@ import {
   Box,
   Center,
   CheckIcon,
+  FormControl,
+  HStack,
   Select as NativeBaseSelect,
   Text,
 } from "native-base";
 import { ComponentProps, ReactNode, useState } from "react";
+import { FormFieldHeader } from "./FormFieldHeader";
 
 interface SelectProps extends ComponentProps<typeof NativeBaseSelect> {
   label: string;
   txtColor?: string;
   children: ReactNode;
+  errorMsg?: string | null;
+  isRequired?: boolean;
+  isInvalid?: boolean;
 }
 
 export function SelectRoot({
   label,
   txtColor,
   children,
+  errorMsg,
+  isRequired,
+  isInvalid,
   ...props
 }: SelectProps) {
+  const invalid = !!errorMsg || isInvalid;
+
   return (
     <Center>
-      <Box minW="full" h={10} mb={10}>
-        <Text color={txtColor} fontSize="xs">
-          {label}
-        </Text>
+      <FormControl isInvalid={invalid} minW="full" maxW="full" h={10} mb={10}>
+        <FormFieldHeader
+          label={label}
+          isRequired={isRequired}
+          formControlError={
+            <FormControl.ErrorMessage m={0}>
+              {errorMsg ? errorMsg : null}
+            </FormControl.ErrorMessage>
+          }
+        />
         <NativeBaseSelect
           w="full"
           accessibilityLabel="Escolha o seu gênero"
@@ -36,6 +53,7 @@ export function SelectRoot({
           }}
           py={0}
           h={10}
+          borderColor={invalid ? "red.400" : undefined}
           color="gray.100"
           fontFamily="body"
           fontSize="sm"
@@ -43,7 +61,7 @@ export function SelectRoot({
         >
           {children}
         </NativeBaseSelect>
-      </Box>
+      </FormControl>
     </Center>
   );
 }

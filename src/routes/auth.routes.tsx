@@ -9,6 +9,7 @@ import { SignUp } from "@screens/SignUp";
 import { Stores } from "@screens/Stores";
 import { Welcome } from "@screens/Welcome";
 import { Offers } from "@screens/Offers";
+import { PromoDetailUnauthenticated } from "@screens/PromoDetailPromoDetailUnauthenticated";
 
 import { BackgroundGradientImage } from "@components/BackgroundGradientImage";
 
@@ -18,6 +19,7 @@ type AuthRoutes = {
   stores: undefined;
   welcome: undefined;
   offers: undefined;
+  promoDetailUnauthenticated: undefined;
 };
 
 export type AuthNavigatorRoutesProps = NativeStackNavigationProp<AuthRoutes>;
@@ -38,6 +40,10 @@ export function AuthRoutes() {
         <Screen name="signIn" component={SignIn} />
         <Screen name="signUp" component={SignUp} />
         <Screen name="stores" component={Stores} />
+        <Screen
+          name="promoDetailUnauthenticated"
+          component={PromoDetailUnauthenticated}
+        />
       </Navigator>
     </Box>
   );

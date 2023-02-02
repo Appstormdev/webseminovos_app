@@ -9,7 +9,7 @@ export function ScreenHeader({ title }: ScreenHeaderProps) {
   return (
     <HStack bg="blue.500" pb={4} pt={12}>
       <HStack flex={1} justifyContent="space-around" alignItems="center">
-        <Heading color="gray.100" fontSize="xl">
+        <Heading color="gray.100" fontSize="xl" fontFamily="heading">
           {title}
         </Heading>
 

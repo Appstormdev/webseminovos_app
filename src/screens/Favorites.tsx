@@ -4,7 +4,7 @@ import { useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "@routes/app.routes";
 import { VStack, Box, Text, View } from "native-base";
 import { useState } from "react";
-import Container from "@components/Container";
+import { Container } from "@components/Container";
 
 type IPromoProps = {
   promoId: string;
@@ -45,7 +45,7 @@ export function Favorites() {
   }
 
   return (
-    <Container hasHeader>
+    <Container>
       <VStack flex={1}>
         <ScreenHeader title="Favoritos" />
 

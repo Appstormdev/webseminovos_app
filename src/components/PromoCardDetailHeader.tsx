@@ -19,10 +19,10 @@ export function PromoCardDetailHeader({
   return (
     <HStack justifyContent="space-between">
       <HStack>
-        <Heading color="blue.400" size="md" mr={2}>
+        <Heading color="blue.400" size="md" mr={2} fontFamily="heading">
           {brand}
         </Heading>
-        <Heading color="red.300" size="md">
+        <Heading color="red.300" size="md" fontFamily="heading">
           {model}
         </Heading>
       </HStack>

@@ -7,7 +7,7 @@ import {
   Heading,
   Text,
 } from "native-base";
-import Container from "@components/Container";
+import { Container } from "@components/Container";
 
 import { HomeHeader } from "@components/HomeHeader";
 import { PromoCard } from "@components/PromoCard";
@@ -19,8 +19,11 @@ import CoverCar from "../assets/cover_car.png";
 import { Dimensions } from "react-native";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
-import { ScreenHeader } from "@components/ScreenHeader";
 import { ScreenHeaderAuth } from "@components/ScreenHeaderAuth";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
 
 type IPromoProps = {
   promoId: string;
@@ -28,6 +31,14 @@ type IPromoProps = {
   description: string;
   imageUrl: string;
 };
+
+type FormDataProps = {
+  term: string;
+};
+
+const searchSchema = yup.object({
+  term: yup.string().required("Informe o modelo ou marca"),
+});
 
 export function Offers() {
   const [promos, setPromos] = useState<IPromoProps[]>([
@@ -68,16 +79,28 @@ export function Offers() {
     },
   ]);
 
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormDataProps>({
+    resolver: yupResolver(searchSchema),
+  });
+
   const [newSearch, setNewSearch] = useState<string>();
 
-  const navigation = useNavigation<AppNavigatorRoutesProps>();
+  const navigation = useNavigation<AuthNavigatorRoutesProps>();
 
   function handleOpenPromoCardDetail() {
-    navigation.navigate("promoDetail");
+    navigation.navigate("promoDetailUnauthenticated");
   }
 
+  const handleSearch = (data: FormDataProps) => {
+    console.log(data);
+  };
+
   return (
-    <Container hasHeader>
+    <Container>
       <VStack flex={1}>
         <ScreenHeaderAuth title="Ofertas" />
 
@@ -91,18 +114,30 @@ export function Offers() {
           />
 
           <Box mx={4}>
-            <Input
-              placeholder="digite o modelo ou marca do veículo...."
-              autoCapitalize="none"
-              variant="outline"
-              type="text"
-              onChangeText={(value) => setNewSearch(value)}
+            <Controller
+              control={control}
+              name="term"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  placeholder="digite o modelo ou marca do veículo...."
+                  autoCapitalize="none"
+                  variant="outline"
+                  type="text"
+                  onChangeText={onChange}
+                  value={value}
+                  errorMsg={errors?.term?.message}
+                  isRequired
+                />
+              )}
             />
-            <Button title="Procurar ofertas" />
+            <Button
+              title="Procurar ofertas"
+              onPress={handleSubmit(handleSearch)}
+            />
           </Box>
 
           <VStack flex={1} mx={4} mb={8} mt={8}>
-            <Heading color="gray.100" size="sm">
+            <Heading color="gray.100" size="sm" fontFamily="heading">
               Ofertas localizadas
             </Heading>
             {promos.length > 0 && (

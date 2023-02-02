@@ -9,28 +9,39 @@ import {
   AspectRatio,
   ScrollView,
   useTheme,
+  useToast,
 } from "native-base";
 import { Container } from "@components/Container";
 
 import { useNavigation } from "@react-navigation/native";
-import { AppNavigatorRoutesProps } from "@routes/app.routes";
 import { TouchableOpacity } from "react-native";
 import { Feather, FontAwesome } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PromoCardDetailHeader } from "@components/PromoCardDetailHeader";
 import { PromoCardDetailDescription } from "@components/PromoCardDetailDescription";
 import { formatPrice } from "@utils/pricesTools";
 import { PromoCardDetailTechnicalFeaturesField } from "@components/PromoCardDetailTechnicalFeaturesField";
 import { Button } from "@components/Button";
+import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
 
-export function PromoDetail() {
-  const navigation = useNavigation<AppNavigatorRoutesProps>();
+export function PromoDetailUnauthenticated() {
+  const navigation = useNavigation<AuthNavigatorRoutesProps>();
   const { colors } = useTheme();
+  const toast = useToast();
 
   const [favorited, setFavorited] = useState<boolean>(false);
 
   const handleGoBack = () => {
     navigation.goBack();
+  };
+
+  const handleFavoring = () => {
+    toast.show({
+      title: "Faça seu login ou crie uma conta para salvar seus favoritos!",
+      placement: "top-right",
+      bgColor: "green.600",
+    });
+    navigation.navigate("signIn");
   };
   return (
     <Container>
@@ -88,11 +99,11 @@ export function PromoDetail() {
               brand="Chevrolet"
               model="Onix"
               favorited={favorited}
-              setFavorited={() => setFavorited(!favorited)}
+              setFavorited={handleFavoring}
             />
             <PromoCardDetailDescription
               description="Chevrolet Onix 1.8 - Flex - 4 Portas - Ar Condicionado - Direção
-            Elétrica - Controle de Tração"
+              Elétrica - Controle de Tração"
             />
 
             <Box mt={4}>

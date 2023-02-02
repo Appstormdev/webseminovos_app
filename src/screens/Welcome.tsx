@@ -1,5 +1,5 @@
 import { Center, Image, VStack, Text, Box, useTheme } from "native-base";
-import Container from "@components/Container";
+import { Container } from "@components/Container";
 
 import Logo from "@assets/wsn_logo.png";
 import { Input } from "@components/Input";
@@ -7,11 +7,19 @@ import { Button } from "@components/Button";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
+import { useOffers } from "@hooks/useOffers";
 
 export function Welcome() {
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
+  const { fetchSearchOffers } = useOffers();
   const { colors } = useTheme();
-  const [newSearch, setNewSearch] = useState<string>();
+  const [newSearch, setNewSearch] = useState<string>("");
+
+  const handleSearchOffers = () => {
+    fetchSearchOffers(newSearch);
+    navigation.navigate("offers");
+  };
+
   return (
     <Container>
       <VStack flex={1} justifyContent="center">
@@ -47,7 +55,7 @@ export function Welcome() {
                 backgroundColor: colors.red[400],
               },
             }}
-            onPress={() => navigation.navigate("offers")}
+            onPress={handleSearchOffers}
           />
         </Box>
       </VStack>
