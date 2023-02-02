@@ -85,8 +85,8 @@ export function PromoDetailScreen({
           </Box>
           <Box bg="gray.100" mt={6} rounded="md" p={4}>
             <PromoCardDetailHeader
-              brand={offer?.carBrand}
-              model={offer?.carModel}
+              brand={offer?.carBrand || ""}
+              model={offer?.carModel || ""}
               favorited={false}
               setFavorited={onHandleFavoring}
             />
