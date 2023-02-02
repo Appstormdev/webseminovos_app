@@ -3,8 +3,10 @@ import { ScreenHeader } from "@components/ScreenHeader";
 import { useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "@routes/app.routes";
 import { VStack, Box, Text, View } from "native-base";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Container } from "@components/Container";
+import { useAuth } from "@hooks/useAuth";
+import { useOffers } from "@hooks/useOffers";
 
 type IPromoProps = {
   promoId: string;
@@ -15,34 +17,27 @@ type IPromoProps = {
 
 export function Favorites() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-  // const [favorites, setFavorites] = useState<IPromoProps[]>([]);
-  const [favorites, setFavorites] = useState<IPromoProps[]>([
-    {
-      promoId: "0",
-      title: "Chevrolet Onix 2017",
-      description: "Chevrolet Onyx 2017 1.0 Joy SPE/4",
-      imageUrl:
-        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    },
-    {
-      promoId: "1",
-      title: "Chevrolet Onix 2017",
-      description: "Chevrolet Onyx 2017 1.0 Joy SPE/4",
-      imageUrl:
-        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    },
-    {
-      promoId: "2",
-      title: "Chevrolet Onix 2017",
-      description: "Chevrolet Onyx 2017 1.0 Joy SPE/4",
-      imageUrl:
-        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
-    },
-  ]);
+  const { getFavoritedList, favorites: userFavoritedList } = useAuth();
+  const { selectOffer, selectedOffer } = useOffers();
 
-  function handleOpenPromoCardDetail() {
+  const [favorites, setFavorites] = useState<IPromoProps[]>([]);
+
+  useEffect(() => {
+    setFavorites(getFavoritedList());
+  }, []);
+
+  useEffect(() => {
+    setFavorites(getFavoritedList());
+  }, [userFavoritedList]);
+
+  function handleOpenPromo(promoId: string) {
+    selectOffer(promoId);
     navigation.navigate("promoDetail");
   }
+
+  useEffect(() => {
+    console.log(selectedOffer);
+  }, [selectedOffer]);
 
   return (
     <Container>
@@ -63,7 +58,7 @@ export function Favorites() {
                 title={item.title}
                 description={item.description}
                 key={item.promoId}
-                onPress={handleOpenPromoCardDetail}
+                onPress={() => handleOpenPromo(item.promoId)}
               />
             ))
           ) : (

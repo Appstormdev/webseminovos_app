@@ -12,6 +12,13 @@ type UserProps = {
   avatarUrl: string;
 };
 
+type IFavorite = {
+  promoId: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+};
+
 export type AuthContextDataProps = {
   user: UserProps | null;
   userToken: string;
@@ -20,6 +27,7 @@ export type AuthContextDataProps = {
   handleChangeAvatar: (avatarUrl: string) => void;
   handleFavorited: (offer: OffersDTO) => void;
   favorites: OffersDTO[];
+  getFavoritedList: () => IFavorite[];
   thisOfferIsFavorited: (offerId: string) => boolean;
 };
 
@@ -114,6 +122,19 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     if (!hasFavorited) setFavorites([...favorites, offer]);
   }
 
+  function getFavoritedList(): IFavorite[] {
+    const favoritedList: IFavorite[] = favorites.map((item) => {
+      return {
+        promoId: item.id,
+        title: item.titulo_oferta,
+        description: item.descricao_oferta,
+        imageUrl: item.imagem_oferta,
+      };
+    });
+
+    return favoritedList;
+  }
+
   function thisOfferIsFavorited(offerId: string): boolean {
     const isFavorited = !!favorites.find((item) => item.id === offerId);
     return isFavorited;
@@ -129,6 +150,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         handleChangeAvatar,
         handleFavorited,
         favorites,
+        getFavoritedList,
         thisOfferIsFavorited,
       }}
     >
