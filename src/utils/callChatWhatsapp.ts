@@ -24,7 +24,7 @@ export function callChatWhatsapp({
         "whatsapp://send?text=" + msg + "&phone=55" + businessWhatsappNumber;
       Linking.openURL(url)
         .then((data) => {
-          console.log("WhatsApp Opened successfully " + data);
+          console.info("WhatsApp Opened successfully " + data);
         })
         .catch(() => {
           alert("Make sure WhatsApp installed on your device");
