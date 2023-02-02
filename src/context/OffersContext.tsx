@@ -7,8 +7,8 @@ import { getFullAddress } from "@utils/addressTools";
 
 export type OffersContextDataProps = {
   offers: OffersDTO[];
-  selectedOffer: OffersDTO | null;
-  offer: OfferType | null;
+  selectedOffer: OffersDTO;
+  offer: OfferType;
   fetchSearchOffers: (term: string) => Promise<void>;
   selectOffer: (offerId: string) => void;
   loadOffer: () => void;
@@ -36,6 +36,64 @@ type OfferType = {
   carMileage: string;
 };
 
+const initialOfferState = {
+  businessName: "",
+  businessLogo: "",
+  businessFullAddress: "",
+  businessWhatsappNumber: "",
+  carId: "",
+  carTitle: "",
+  carImage: "",
+  carBrand: "",
+  carModel: "",
+  carDescription: "",
+  carPrice: "",
+  carYear: "",
+  carEngine: "",
+  carFuelType: "",
+  carMileage: "",
+};
+
+const initialSelectedOfferState = {
+  id: "",
+  id_company: "",
+  name: "",
+  number: "",
+  neighbour: "",
+  complement: "",
+  identification: "",
+  country: "",
+  city: "",
+  state: "",
+  phone: "",
+  responsible_name: "",
+  responsible_email: "",
+  status: "",
+  segment: "",
+  segment_description: "",
+  address: "",
+  zip_code: "",
+  avatar: "",
+  titulo_oferta: "",
+  descricao_oferta: "",
+  cupom_oferta: "",
+  data_cadastro_oferta: "",
+  data_inicio_oferta: "",
+  data_fim_oferta: "",
+  status_oferta: "",
+  beacon_oferta: "",
+  dias_semana_oferta: "",
+  acessos: "",
+  imagem_oferta: "",
+  marca_oferta: "",
+  modelo_oferta: "",
+  ano_oferta: "",
+  motorizacao_oferta: "",
+  combustivel_oferta: "",
+  km_oferta: "",
+  preco_oferta: "",
+};
+
 export const OffersContext = createContext<OffersContextDataProps>(
   {} as OffersContextDataProps
 );
@@ -44,8 +102,11 @@ export function OffersContextProvider({
   children,
 }: OffersContextProviderProps) {
   const [offers, setOffers] = useState<OffersDTO[]>([]);
-  const [offer, setOffer] = useState<OfferType | null>(null);
-  const [selectedOffer, setSelectedOffer] = useState<OffersDTO | null>(null);
+  const [offer, setOffer] = useState<OfferType>(initialOfferState);
+
+  const [selectedOffer, setSelectedOffer] = useState<OffersDTO>(
+    initialSelectedOfferState
+  );
 
   async function fetchSearchOffers(term: string) {
     try {
@@ -68,15 +129,10 @@ export function OffersContextProvider({
     } catch (error) {}
   }
 
-  useEffect(() => {
-    loadOffers();
-  }, []);
-
   function selectOffer(offerId: string) {
     const offer = offers.find((offer) => offer.id === offerId);
 
     if (offer) setSelectedOffer(offer);
-    console.log("SELECTED:", offer);
   }
 
   function loadOffer() {
