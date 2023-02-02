@@ -1,13 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 
 import { PromoDetailScreen } from "@components/PromoDetailScreen";
 import { AppNavigatorRoutesProps } from "@routes/app.routes";
 import { useOffers } from "@hooks/useOffers";
+import { useAuth } from "@hooks/useAuth";
 
 export function PromoDetail() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-  const { selectedOffer, loadOffer, offer } = useOffers();
+  const { handleFavorited } = useAuth();
+  const { selectedOffer, loadOffer, offers } = useOffers();
 
   useEffect(() => {
     loadOffer();
@@ -18,7 +20,10 @@ export function PromoDetail() {
   };
 
   const handleFavoring = () => {
-    console.info("Fazer");
+    const originalOfferData = offers.find(
+      (item) => item.id === selectedOffer?.id
+    );
+    if (originalOfferData) handleFavorited(originalOfferData);
   };
 
   return (
