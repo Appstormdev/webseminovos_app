@@ -5,12 +5,12 @@ import { TouchableOpacity } from "react-native";
 import { useAuth } from "@hooks/useAuth";
 
 export function HomeHeader() {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   return (
     <HStack bg="blue.500" pt={12} pb={5} px={8} alignItems="center">
       <UserPhoto
-        source={{ uri: `https://github.com/rgranvilla.png` }}
+        source={{ uri: user?.avatarUrl }}
         alt="Imagem do usuário"
         size={12}
         mr={4}
@@ -20,7 +20,7 @@ export function HomeHeader() {
           Olá
         </Text>
         <Heading color="gray.100" fontSize="md" fontFamily="heading">
-          Ricardo
+          {user?.name}
         </Heading>
       </VStack>
       <TouchableOpacity>
