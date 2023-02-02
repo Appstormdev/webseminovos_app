@@ -11,6 +11,8 @@ import CoverCar from "../assets/cover_car.png";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { useOffers } from "@hooks/useOffers";
+import { useAuth } from "@hooks/useAuth";
+import { ScreenHeaderAuth } from "./ScreenHeaderAuth";
 
 type IPromoProps = {
   promoId: string;
@@ -25,6 +27,7 @@ interface OffersScreenProps {
 
 export function OffersScreen({ handleOpenPromo }: OffersScreenProps) {
   const { offers, fetchSearchOffers } = useOffers();
+  const { userToken } = useAuth();
 
   const [newSearch, setNewSearch] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -65,7 +68,7 @@ export function OffersScreen({ handleOpenPromo }: OffersScreenProps) {
   return (
     <Container>
       <VStack flex={1}>
-        <HomeHeader />
+        {userToken ? <HomeHeader /> : <ScreenHeaderAuth />}
         <ScrollView mt={6}>
           <Image
             w="full"
