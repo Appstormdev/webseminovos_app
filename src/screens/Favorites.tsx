@@ -35,10 +35,6 @@ export function Favorites() {
     navigation.navigate("promoDetail");
   }
 
-  useEffect(() => {
-    console.log(selectedOffer);
-  }, [selectedOffer]);
-
   return (
     <Container>
       <VStack flex={1}>
