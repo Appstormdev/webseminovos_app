@@ -23,11 +23,12 @@ import { Select } from "@components/Select";
 import { UserPhoto } from "@components/UserPhoto";
 import { formatDate, onlyLegalAge } from "@utils/dateTools";
 import { useAuth } from "@hooks/useAuth";
+import UserPhotoDefault from "@assets/userPhotoDefault.png";
 
 export function Profile() {
   const { user, handleChangeAvatar } = useAuth();
   const [photoIsLoading, setPhotoIsLoading] = useState<boolean>(false);
-  const [userPhoto, setUserPhoto] = useState<string>(user?.avatarUrl || "");
+  const [userPhoto, setUserPhoto] = useState<string>(user.avatarUrl);
 
   const toast = useToast();
 
@@ -102,7 +103,7 @@ export function Profile() {
         <ScrollView>
           <Center mt={6} px={10} mb={6}>
             <UserPhoto
-              source={{ uri: userPhoto }}
+              source={userPhoto ? { uri: userPhoto } : UserPhotoDefault}
               alt="Foto do usuário"
               size={128}
               isLoading={photoIsLoading}
@@ -132,7 +133,7 @@ export function Profile() {
 
             <Input
               label="Email"
-              value={user?.email}
+              value={user.email}
               isDisabled
               keyboardType="email-address"
               autoCapitalize="none"
