@@ -6,11 +6,12 @@ import { useAuth } from "@hooks/useAuth";
 import { AuthRoutes } from "./auth.routes";
 import { AppRoutes } from "./app.routes";
 import { useEffect, useState } from "react";
+import { Loading } from "@components/Loading";
 
 const PERSISTENCE_KEY = "@wsnBeacon:NAVIGATION_STATE_V1";
 
 export function Routes() {
-  const { userToken } = useAuth();
+  const { userToken, isLoadingUserToken } = useAuth();
 
   const [isReady, setIsReady] = useState(false);
   const [initialState, setInitialState] = useState();
@@ -41,8 +42,8 @@ export function Routes() {
     }
   }, [isReady]);
 
-  if (!isReady) {
-    return null;
+  if (!isReady || isLoadingUserToken) {
+    return <Loading />;
   }
 
   return (
