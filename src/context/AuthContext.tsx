@@ -49,66 +49,71 @@ export const AuthContext = createContext<AuthContextDataProps>(
   {} as AuthContextDataProps
 );
 
+//TODO: Remover ao integrar com o backend
+let userTest = {
+  name: "Alice Megan",
+  email: "alice.magan@mail.com",
+  phone: "11999019901",
+  born: "2001-06-15",
+  gender: "female",
+  avatarUrl:
+    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fA%3D%3D&w=1000&q=80",
+};
+
+//TODO: remover ao integrar com o backend
+let tokenTest = "apenasUmTesteDeToken";
+
 export function AuthContextProvider({ children }: AuthContextProviderProps) {
   const [user, setUser] = useState<UserProps>({} as UserProps);
   const [userToken, setUserToken] = useState<string>("");
   const [isLoadingUserToken, setIsLoadingUserToken] = useState<boolean>(true);
   const [favorites, setFavorites] = useState<OffersDTO[]>([]);
 
-  async function storageUserAndToken(userData: UserProps, token: string) {
+  async function updateUserAndToken(userData: UserProps, token: string) {
+    //TODO: Atualizar o cabeçalho da requisição backend
+
+    setUser(userData);
+    setUserToken(token);
+  }
+
+  async function saveStorageUserAndToken(userData: UserProps, token: string) {
     try {
       setIsLoadingUserToken(true);
 
-      saveStoreAuthToken("teste");
-      saveStoreUser(userData);
-      setUser(userData);
+      await saveStoreUser(userData);
+      await saveStoreAuthToken(token);
     } catch (error) {
-      // saving error
+      throw error;
     } finally {
       setIsLoadingUserToken(false);
     }
   }
 
-  async function signIn(email: string, password: string) {
-    console.log(email, password);
-
-    //TODO: Pegar a rota de login de cliente
-    /**
+  async function removeStorageUserAndToken() {
     try {
-      const { data } = await api.post("", { email, password });
-      
-      if (data.user) {
-        setUser(data.user);
-        storageUserSave(data.user);
-      }
+      await removeStoreUser();
+      await removeStoreAuthToken();
     } catch (error) {
       throw error;
     }
-  */
-    const userTest = {
-      name: "Alice Megan",
-      email: "alice.magan@mail.com",
-      phone: "11999019901",
-      born: "2001-06-15",
-      gender: "female",
-      avatarUrl:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fA%3D%3D&w=1000&q=80",
-    };
-    const tokenTest = "apenasUmTesteDeToken";
+  }
 
-    await storageUserAndToken(userTest, tokenTest);
+  function clearAllState() {
+    try {
+      setUser({} as UserProps);
+      setUserToken("");
+      setFavorites([] as OffersDTO[]);
+    } catch (error) {
+      throw error;
+    }
   }
 
   async function logout() {
     try {
       setIsLoadingUserToken(true);
 
-      setUser({} as UserProps);
-      setUserToken("");
-      setFavorites([] as OffersDTO[]);
-
-      await removeStoreUser();
-      await removeStoreAuthToken();
+      await removeStorageUserAndToken();
+      clearAllState();
     } catch (error) {
       throw error;
     } finally {
@@ -116,15 +121,33 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     }
   }
 
-  async function loadUserToken() {
+  async function signIn(email: string, password: string) {
     try {
-      const userToken = await getStoreAuthToken();
-      const user = await getStoreUser();
+      setIsLoadingUserToken(true);
 
-      if (userToken) {
-        setUserToken(userToken);
-        setUser(user);
-        setIsLoadingUserToken(false);
+      //TODO: fazer integração com o backend
+
+      //TODO: trocar userTest e tokenTest pelos valores que vierem do backend
+      if (userTest && tokenTest) {
+        await saveStorageUserAndToken(userTest, tokenTest);
+        await updateUserAndToken(userTest, tokenTest);
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      setIsLoadingUserToken(false);
+    }
+  }
+
+  async function loadUserData() {
+    try {
+      setIsLoadingUserToken(true);
+
+      const userLogged = await getStoreUser();
+      const token = await getStoreAuthToken();
+
+      if (userLogged && token) {
+        updateUserAndToken(userLogged, token);
       }
     } catch (error) {
       throw error;
@@ -134,7 +157,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
   }
 
   useEffect(() => {
-    loadUserToken();
+    loadUserData();
   }, []);
 
   function handleChangeAvatar(avatarUrl: string) {
