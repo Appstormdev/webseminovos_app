@@ -1,9 +1,18 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
 
-import { storeUserToken, getUserToken } from "@storage/storageUserToken";
+import {
+  saveStoreUser,
+  getStoreUser,
+  removeStoreUser,
+} from "@storage/storageUser";
 import { OffersDTO } from "@dtos/OffersDTO";
+import {
+  getStoreAuthToken,
+  removeStoreAuthToken,
+  saveStoreAuthToken,
+} from "@storage/storageAuthToken";
 
-type UserProps = {
+export type UserProps = {
   name: string;
   email: string;
   phone: string;
@@ -20,8 +29,9 @@ type IFavorite = {
 };
 
 export type AuthContextDataProps = {
-  user: UserProps | null;
+  user: UserProps;
   userToken: string;
+  isLoadingUserToken: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   logout: () => void;
   handleChangeAvatar: (avatarUrl: string) => void;
@@ -40,9 +50,24 @@ export const AuthContext = createContext<AuthContextDataProps>(
 );
 
 export function AuthContextProvider({ children }: AuthContextProviderProps) {
-  const [user, setUser] = useState<UserProps | null>(null);
+  const [user, setUser] = useState<UserProps>({} as UserProps);
   const [userToken, setUserToken] = useState<string>("");
+  const [isLoadingUserToken, setIsLoadingUserToken] = useState<boolean>(true);
   const [favorites, setFavorites] = useState<OffersDTO[]>([]);
+
+  async function storageUserAndToken(userData: UserProps, token: string) {
+    try {
+      setIsLoadingUserToken(true);
+
+      saveStoreAuthToken("teste");
+      saveStoreUser(userData);
+      setUser(userData);
+    } catch (error) {
+      // saving error
+    } finally {
+      setIsLoadingUserToken(false);
+    }
+  }
 
   async function signIn(email: string, password: string) {
     console.log(email, password);
@@ -60,8 +85,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
       throw error;
     }
   */
-
-    setUser({
+    const userTest = {
       name: "Alice Megan",
       email: "alice.magan@mail.com",
       phone: "11999019901",
@@ -69,33 +93,49 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
       gender: "female",
       avatarUrl:
         "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fA%3D%3D&w=1000&q=80",
-    });
-    setUserToken("teste");
-    storeUserToken("teste");
+    };
+    const tokenTest = "apenasUmTesteDeToken";
+
+    await storageUserAndToken(userTest, tokenTest);
   }
 
-  function logout() {
-    setUser(null);
-    setUserToken("");
-    storeUserToken("");
-    setFavorites([]);
+  async function logout() {
+    try {
+      setIsLoadingUserToken(true);
+
+      setUser({} as UserProps);
+      setUserToken("");
+      setFavorites([] as OffersDTO[]);
+
+      await removeStoreUser();
+      await removeStoreAuthToken();
+    } catch (error) {
+      throw error;
+    } finally {
+      setIsLoadingUserToken(false);
+    }
   }
 
   async function loadUserToken() {
-    const userToken = await getUserToken();
+    try {
+      const userToken = await getStoreAuthToken();
+      const user = await getStoreUser();
 
-    if (userToken) {
-      setUserToken(userToken);
+      if (userToken) {
+        setUserToken(userToken);
+        setUser(user);
+        setIsLoadingUserToken(false);
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      setIsLoadingUserToken(false);
     }
   }
 
   useEffect(() => {
     loadUserToken();
   }, []);
-
-  useEffect(() => {
-    if (user === null) logout();
-  }, [user]);
 
   function handleChangeAvatar(avatarUrl: string) {
     let updatedUser: UserProps;
@@ -146,6 +186,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         user,
         signIn,
         userToken,
+        isLoadingUserToken,
         logout,
         handleChangeAvatar,
         handleFavorited,
