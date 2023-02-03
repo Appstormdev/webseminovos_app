@@ -4,8 +4,6 @@ import { Container } from "@components/Container";
 import { HomeHeader } from "@components/HomeHeader";
 import { PromoCard } from "@components/PromoCard";
 import { useEffect, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
-import { AppNavigatorRoutesProps } from "@routes/app.routes";
 
 import CoverCar from "../assets/cover_car.png";
 import { Input } from "@components/Input";
