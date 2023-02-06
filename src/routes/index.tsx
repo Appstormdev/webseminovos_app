@@ -1,5 +1,4 @@
 import { Linking, Platform } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationContainer } from "@react-navigation/native";
 
 import { useAuth } from "@hooks/useAuth";
@@ -7,8 +6,10 @@ import { AuthRoutes } from "./auth.routes";
 import { AppRoutes } from "./app.routes";
 import { useEffect, useState } from "react";
 import { Loading } from "@components/Loading";
-
-const PERSISTENCE_KEY = "@wsnBeacon:NAVIGATION_STATE_V1";
+import {
+  getStoragePersistence,
+  saveStoragePersistence,
+} from "@storage/storagePersistence";
 
 export function Routes() {
   const { userToken, isLoadingUserToken } = useAuth();
@@ -16,17 +17,18 @@ export function Routes() {
   const [isReady, setIsReady] = useState(false);
   const [initialState, setInitialState] = useState();
 
+  //Restore route state
   useEffect(() => {
     const restoreState = async () => {
       try {
         const initialUrl = await Linking.getInitialURL();
 
-        if (Platform.OS !== "web" && initialUrl == null) {
+        if (
+          Platform.OS !== "web" &&
+          initialUrl === "com.wsnbeacon://192.168.0.11:8081"
+        ) {
           // Only restore state if there's no deep link and we're not on web
-          const savedStateString = await AsyncStorage.getItem(PERSISTENCE_KEY);
-          const state = savedStateString
-            ? JSON.parse(savedStateString)
-            : undefined;
+          const state = await getStoragePersistence();
 
           if (state !== undefined) {
             setInitialState(state);
@@ -49,9 +51,10 @@ export function Routes() {
   return (
     <NavigationContainer
       initialState={initialState}
-      onStateChange={(state) =>
-        AsyncStorage.setItem(PERSISTENCE_KEY, JSON.stringify(state))
-      }
+      onStateChange={async (state) => {
+        console.log("save:", state);
+        await saveStoragePersistence(state);
+      }}
     >
       {userToken ? <AppRoutes /> : <AuthRoutes />}
     </NavigationContainer>
