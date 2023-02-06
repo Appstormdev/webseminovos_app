@@ -1,29 +1,21 @@
-import { UserProps } from "@context/AuthContext";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useStorage } from "@hooks/useStorage";
 import { AUTH_TOKEN_STORAGE } from "./storageConfig";
 
-export const saveStoreAuthToken = async (userToken: string) => {
-  try {
-    await AsyncStorage.setItem(AUTH_TOKEN_STORAGE, userToken);
-  } catch (error) {
-    // saving error
-  }
-};
+export async function saveStoreAuthToken(userToken: string) {
+  const { saveStorageData } = useStorage();
+  await saveStorageData({
+    key: AUTH_TOKEN_STORAGE,
+    value: userToken,
+    isStringValue: true,
+  });
+}
 
 export const getStoreAuthToken = async () => {
-  try {
-    const jsonValue = await AsyncStorage.getItem(AUTH_TOKEN_STORAGE);
-
-    if (jsonValue !== null) {
-      return jsonValue;
-    }
-
-    return;
-  } catch (error) {
-    // saving error reading value
-  }
+  const { getStorageData } = useStorage();
+  return await getStorageData({ key: AUTH_TOKEN_STORAGE, isStringValue: true });
 };
 
 export const removeStoreAuthToken = async () => {
-  await AsyncStorage.removeItem(AUTH_TOKEN_STORAGE);
+  const { removeStorageData } = useStorage();
+  await removeStorageData({ key: AUTH_TOKEN_STORAGE });
 };
