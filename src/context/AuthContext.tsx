@@ -1,15 +1,15 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
 
 import {
-  saveStoreUser,
-  getStoreUser,
-  removeStoreUser,
+  saveStorageUser,
+  getStorageUser,
+  removeStorageUser,
 } from "@storage/storageUser";
 import { OffersDTO } from "@dtos/OffersDTO";
 import {
-  getStoreAuthToken,
-  removeStoreAuthToken,
-  saveStoreAuthToken,
+  getStorageAuthToken,
+  removeStorageAuthToken,
+  saveStorageAuthToken,
 } from "@storage/storageAuthToken";
 
 export type UserProps = {
@@ -80,8 +80,8 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     try {
       setIsLoadingUserToken(true);
 
-      await saveStoreUser(userData);
-      await saveStoreAuthToken(token);
+      await saveStorageUser(userData);
+      await saveStorageAuthToken(token);
     } catch (error) {
       throw error;
     } finally {
@@ -91,8 +91,8 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
 
   async function removeStorageUserAndToken() {
     try {
-      await removeStoreUser();
-      await removeStoreAuthToken();
+      await removeStorageUser();
+      await removeStorageAuthToken();
     } catch (error) {
       throw error;
     }
@@ -143,8 +143,8 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     try {
       setIsLoadingUserToken(true);
 
-      const userLogged = await getStoreUser();
-      const token = await getStoreAuthToken();
+      const userLogged = await getStorageUser();
+      const token = await getStorageAuthToken();
 
       if (userLogged && token) {
         updateUserAndToken(userLogged, token);

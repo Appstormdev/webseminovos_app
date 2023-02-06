@@ -2,7 +2,7 @@ import { createContext, ReactNode, useEffect, useState } from "react";
 
 import { OffersDTO } from "@dtos/OffersDTO";
 import { api } from "@services/api";
-import { getOffers, storeOffers } from "@storage/storageOffers";
+import { getStorageOffers, saveStorageOffers } from "@storage/storageOffers";
 import { getFullAddress } from "@utils/addressTools";
 
 export type OffersContextDataProps = {
@@ -115,13 +115,13 @@ export function OffersContextProvider({
       const { data } = response?.data;
 
       setOffers(data);
-      storeOffers(data);
+      saveStorageOffers(data);
     } catch (error) {}
   }
 
   async function loadOffers() {
     try {
-      const offers = await getOffers();
+      const offers = await getStorageOffers();
 
       if (offers) {
         setOffers(offers);

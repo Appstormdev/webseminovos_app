@@ -3,17 +3,17 @@ import { useStorage } from "@hooks/useStorage";
 
 import { OFFERS_STORAGE } from "./storageConfig";
 
-export async function storeOffers(offers: OffersDTO[]) {
+export async function saveStorageOffers(offers: OffersDTO[]) {
   const { saveStorageData } = useStorage();
   await saveStorageData({ key: OFFERS_STORAGE, value: offers });
 }
 
-export async function getOffers() {
+export async function getStorageOffers() {
   const { getStorageData } = useStorage();
   return await getStorageData({ key: OFFERS_STORAGE });
 }
 
-export async function removeOffers() {
+export async function removeStorageOffers() {
   const { removeStorageData } = useStorage();
   await removeStorageData({ key: OFFERS_STORAGE });
 }

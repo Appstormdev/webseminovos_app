@@ -1,7 +1,7 @@
 import { useStorage } from "@hooks/useStorage";
 import { AUTH_TOKEN_STORAGE } from "./storageConfig";
 
-export async function saveStoreAuthToken(userToken: string) {
+export async function saveStorageAuthToken(userToken: string) {
   const { saveStorageData } = useStorage();
   await saveStorageData({
     key: AUTH_TOKEN_STORAGE,
@@ -10,12 +10,12 @@ export async function saveStoreAuthToken(userToken: string) {
   });
 }
 
-export const getStoreAuthToken = async () => {
+export const getStorageAuthToken = async () => {
   const { getStorageData } = useStorage();
   return await getStorageData({ key: AUTH_TOKEN_STORAGE, isStringValue: true });
 };
 
-export const removeStoreAuthToken = async () => {
+export const removeStorageAuthToken = async () => {
   const { removeStorageData } = useStorage();
   await removeStorageData({ key: AUTH_TOKEN_STORAGE });
 };
