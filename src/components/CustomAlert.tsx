@@ -1,10 +1,16 @@
-import { AlertDialog, Center } from "native-base";
+import { AlertDialog, Button as ButtonBase, Center } from "native-base";
+import { Button } from "@components/Button";
 import { ReactNode, useEffect, useRef, useState } from "react";
 
 export interface ICustomAlert {
   header?: string;
   message: string;
-  footer?: ReactNode;
+  onConfirm: () => void;
+  confirmBtnLabel: string;
+  onCancel: () => void;
+  cancelBtnLabel: string;
+  onMaybeLater: () => void;
+  maybeLaterBtnLabel: string;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -12,11 +18,20 @@ export interface ICustomAlert {
 export function CustomAlert({
   header,
   message,
-  footer,
+  onConfirm,
+  confirmBtnLabel,
+  onCancel,
+  cancelBtnLabel,
+  onMaybeLater,
+  maybeLaterBtnLabel,
   isOpen,
   onClose,
 }: ICustomAlert) {
   const cancelRef = useRef(null);
+
+  const hasConfirmBtn = confirmBtnLabel.length > 0;
+  const hasCancelBtn = cancelBtnLabel.length > 0;
+  const hasMaybeLaterBtn = maybeLaterBtnLabel.length > 0;
 
   return (
     <Center>
@@ -29,7 +44,23 @@ export function CustomAlert({
           <AlertDialog.CloseButton />
           {header ? <AlertDialog.Header>{header}</AlertDialog.Header> : null}
           <AlertDialog.Body>{message}</AlertDialog.Body>
-          {footer ? <AlertDialog.Footer>{footer}</AlertDialog.Footer> : null}
+          <AlertDialog.Footer>
+            <ButtonBase.Group space={2}>
+              <>
+                {hasConfirmBtn ?? (
+                  <Button title={confirmBtnLabel} onPress={onConfirm} />
+                )}
+
+                {hasCancelBtn ?? (
+                  <Button title={cancelBtnLabel} onPress={onCancel} />
+                )}
+
+                {hasMaybeLaterBtn ?? (
+                  <Button title={maybeLaterBtnLabel} onPress={onMaybeLater} />
+                )}
+              </>
+            </ButtonBase.Group>
+          </AlertDialog.Footer>
         </AlertDialog.Content>
       </AlertDialog>
     </Center>

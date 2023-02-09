@@ -1,5 +1,8 @@
 import { Linking, Platform } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  useNavigationContainerRef,
+} from "@react-navigation/native";
 
 import { useAuth } from "@hooks/useAuth";
 import { AuthRoutes } from "./auth.routes";
@@ -11,7 +14,23 @@ import {
   saveStoragePersistence,
 } from "@storage/storagePersistence";
 
+const linking = {
+  prefixes: ["com.wsnbeacon://", "exp+wsnbeacon://", "wsnbecon://"],
+  config: {
+    screens: {
+      offers: {
+        path: "offers/:promoId",
+        parse: {
+          promoId: (promoId: string) => promoId,
+        },
+      },
+    },
+  },
+};
+
 export function Routes() {
+  const navigationRef = useNavigationContainerRef();
+
   const { userToken, isLoadingUserToken } = useAuth();
 
   const [isReady, setIsReady] = useState(false);
@@ -50,6 +69,7 @@ export function Routes() {
 
   return (
     <NavigationContainer
+      ref={navigationRef}
       initialState={initialState}
       onStateChange={async (state) => {
         console.log("save:", state);
