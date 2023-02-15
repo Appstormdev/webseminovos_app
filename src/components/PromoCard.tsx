@@ -1,12 +1,4 @@
-import {
-  Heading,
-  HStack,
-  Icon,
-  Image,
-  Text,
-  useTheme,
-  VStack,
-} from "native-base";
+import { Heading, HStack, Icon, Image, Text, VStack } from "native-base";
 import { TouchableOpacity, TouchableOpacityProps } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 
@@ -22,15 +14,15 @@ export function PromoCard({
   imageUrl,
   ...props
 }: PromoCardProps) {
-  const { colors } = useTheme();
+  // TODO: remover o replace da imageUrl
   return (
     <TouchableOpacity {...props}>
       <HStack bg="blue.50" alignItems="center" p={1} pr={4} rounded="md" mb={3}>
         <Image
           source={{
-            uri: `${imageUrl}`,
+            uri: `${imageUrl.replace("localhost", "192.168.0.5")}`,
           }}
-          alt="Imagem de capa da promoção"
+          alt=""
           w={16}
           h={16}
           rounded="md"

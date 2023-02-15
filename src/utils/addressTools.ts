@@ -1,13 +1,23 @@
-import { OffersDTO } from "@dtos/OffersDTO";
+import { IOffersDTO } from "@dtos/OffersDTO";
 
-export const getFullAddress = (offer: OffersDTO) => {
-  const { address, number, complement, neighbour, zip_code, city, state } =
-    offer;
+export const getFullAddress = (offer: IOffersDTO) => {
+  const { company } = offer;
+  const {
+    company_address,
+    company_number,
+    company_complement,
+    company_neighbour,
+    company_zip_code,
+    company_city,
+    company_state,
+  } = company;
 
-  const firstLine = `${address}, ${number ? number : "(S/N)"}${
-    complement && `, ${complement}`
-  } - bairro ${neighbour}.`;
-  const secondLine = `CEP: ${zip_code}. ${city}/${state}`;
+  const firstLine = `${company_address}, ${
+    company_number ? company_number : "(S/N)"
+  }${
+    company_complement && `, ${company_complement}`
+  } - bairro ${company_neighbour}.`;
+  const secondLine = `CEP: ${company_zip_code}. ${company_city}/${company_state}`;
 
   const fullAddress = `${firstLine} ${secondLine}`;
 

@@ -1,16 +1,21 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
+import jwt_decode from "jwt-decode";
 
 import {
   saveStorageUser,
   getStorageUser,
   removeStorageUser,
 } from "@storage/storageUser";
-import { OffersDTO } from "@dtos/OffersDTO";
+import { IOffersDTO } from "@dtos/OffersDTO";
 import {
   getStorageAuthToken,
   removeStorageAuthToken,
   saveStorageAuthToken,
 } from "@storage/storageAuthToken";
+import { apiMultiForm } from "@services/api";
+import { formatDistanceToNow, parseJSON } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { create } from "yup/lib/Reference";
 
 export type UserProps = {
   name: string;
@@ -28,6 +33,32 @@ type IFavorite = {
   imageUrl: string;
 };
 
+type IUserInfoDTO = {
+  client_name: string;
+  client_email: string;
+  client_telephone: string;
+  client_born_date: string;
+  client_create_at: string;
+  client_status: string;
+  client_company_id: string;
+  client_avatar: string;
+  client_gender: string;
+  client_id: string;
+};
+
+type IUserLoggedInfo = {
+  avatarUrl: string;
+  born: string;
+  clientFor: string;
+  email: string;
+  fromCompany: string;
+  gender: string;
+  id: string;
+  name: string;
+  phone: string;
+  status: string;
+};
+
 export type AuthContextDataProps = {
   user: UserProps;
   userToken: string;
@@ -35,8 +66,8 @@ export type AuthContextDataProps = {
   signIn: (email: string, password: string) => Promise<void>;
   logout: () => void;
   handleChangeAvatar: (avatarUrl: string) => void;
-  handleFavorited: (offer: OffersDTO) => void;
-  favorites: OffersDTO[];
+  handleFavorited: (offer: IOffersDTO) => void;
+  favorites: IOffersDTO[];
   getFavoritedList: () => IFavorite[];
   thisOfferIsFavorited: (offerId: string) => boolean;
 };
@@ -49,17 +80,6 @@ export const AuthContext = createContext<AuthContextDataProps>(
   {} as AuthContextDataProps
 );
 
-//TODO: Remover ao integrar com o backend
-let userTest = {
-  name: "Alice Megan",
-  email: "alice.magan@mail.com",
-  phone: "11999019901",
-  born: "2001-06-15",
-  gender: "female",
-  avatarUrl:
-    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fA%3D%3D&w=1000&q=80",
-};
-
 //TODO: remover ao integrar com o backend
 let tokenTest = "apenasUmTesteDeToken";
 
@@ -67,11 +87,10 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
   const [user, setUser] = useState<UserProps>({} as UserProps);
   const [userToken, setUserToken] = useState<string>("");
   const [isLoadingUserToken, setIsLoadingUserToken] = useState<boolean>(true);
-  const [favorites, setFavorites] = useState<OffersDTO[]>([]);
+  const [favorites, setFavorites] = useState<IOffersDTO[]>([]);
 
   async function updateUserAndToken(userData: UserProps, token: string) {
     //TODO: Atualizar o cabeçalho da requisição backend
-
     setUser(userData);
     setUserToken(token);
   }
@@ -102,7 +121,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     try {
       setUser({} as UserProps);
       setUserToken("");
-      setFavorites([] as OffersDTO[]);
+      setFavorites([] as IOffersDTO[]);
     } catch (error) {
       throw error;
     }
@@ -124,14 +143,52 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
   async function signIn(email: string, password: string) {
     try {
       setIsLoadingUserToken(true);
+      const loginData = {
+        email: email,
+        password: password,
+      };
 
-      //TODO: fazer integração com o backend
+      const response = await apiMultiForm.post(`auth/login_client`, loginData);
 
-      //TODO: trocar userTest e tokenTest pelos valores que vierem do backend
-      if (userTest && tokenTest) {
-        await saveStorageUserAndToken(userTest, tokenTest);
-        await updateUserAndToken(userTest, tokenTest);
+      const { status, user_token } = response.data;
+
+      if (status === "SUCCESS") {
+        const userInfo = jwt_decode(user_token);
+        const {
+          client_name,
+          client_email,
+          client_telephone,
+          client_born_date,
+          client_create_at,
+          client_status,
+          client_company_id,
+          client_avatar,
+          client_gender,
+          client_id,
+        } = userInfo as IUserInfoDTO;
+        //TODO: remove replace from avatar when production
+        const userLogged: IUserLoggedInfo = {
+          id: client_id,
+          name: client_name,
+          email: client_email,
+          phone: client_telephone,
+          born: client_born_date,
+          gender: client_gender,
+          clientFor: formatDistanceToNow(parseJSON(client_create_at), {
+            locale: ptBR,
+          }),
+          status: client_status,
+          fromCompany: client_company_id,
+          avatarUrl: client_avatar.replace("localhost", "192.168.0.5"),
+        };
+
+        if (!!userLogged) {
+          await saveStorageUserAndToken(userLogged, user_token);
+          await updateUserAndToken(userLogged, user_token);
+          console.info("[LOGGED] ===>> ", userLogged, user_token);
+        }
       }
+      if (!!response) setIsLoadingUserToken(false);
     } catch (error) {
       throw error;
     } finally {
@@ -173,25 +230,29 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     }
   }
 
-  function handleFavorited(offer: OffersDTO) {
-    const hasFavorited = !!favorites.find((item) => item.id === offer.id);
+  function handleFavorited(offerToFavorite: IOffersDTO) {
+    const hasFavorited = !!favorites.find(
+      (item) => item.offer.offer_id === offerToFavorite.offer.offer_id
+    );
 
     if (hasFavorited) {
       const filteredFavorites = favorites.filter(
-        (item) => item.id !== offer.id
+        (item) => item.offer.offer_id !== offerToFavorite.offer.offer_id
       );
       setFavorites(filteredFavorites);
     }
-    if (!hasFavorited) setFavorites([...favorites, offer]);
+    if (!hasFavorited) {
+      setFavorites([...favorites, offerToFavorite]);
+    }
   }
 
   function getFavoritedList(): IFavorite[] {
     const favoritedList: IFavorite[] = favorites.map((item) => {
       return {
-        promoId: item.id,
-        title: item.titulo_oferta,
-        description: item.descricao_oferta,
-        imageUrl: item.imagem_oferta,
+        promoId: item.offer.offer_id,
+        title: item.offer.offer_titulo,
+        description: item.offer.offer_descricao,
+        imageUrl: item.offer.offer_imagem,
       };
     });
 
@@ -199,7 +260,9 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
   }
 
   function thisOfferIsFavorited(offerId: string): boolean {
-    const isFavorited = !!favorites.find((item) => item.id === offerId);
+    const isFavorited = !!favorites.find(
+      (item) => item.offer.offer_id === offerId
+    );
     return isFavorited;
   }
 

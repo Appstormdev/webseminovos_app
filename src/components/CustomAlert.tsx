@@ -1,6 +1,6 @@
 import { AlertDialog, Button as ButtonBase, Center } from "native-base";
 import { Button } from "@components/Button";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 
 export interface ICustomAlert {
   header?: string;

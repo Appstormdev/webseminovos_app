@@ -9,7 +9,7 @@ import { useOffers } from "@hooks/useOffers";
 export function PromoDetailUnauthenticated() {
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
 
-  const { selectedOffer, loadOffer, offer } = useOffers();
+  const { selectedOffer, loadOffer } = useOffers();
 
   useEffect(() => {
     loadOffer();

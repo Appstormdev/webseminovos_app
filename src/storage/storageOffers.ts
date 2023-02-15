@@ -1,9 +1,9 @@
-import { OffersDTO } from "@dtos/OffersDTO";
+import { IOffersDTO } from "@dtos/OffersDTO";
 import { useStorage } from "@hooks/useStorage";
 
 import { OFFERS_STORAGE } from "./storageConfig";
 
-export async function saveStorageOffers(offers: OffersDTO[]) {
+export async function saveStorageOffers(offers: IOffersDTO[]) {
   const { saveStorageData } = useStorage();
   await saveStorageData({ key: OFFERS_STORAGE, value: offers });
 }

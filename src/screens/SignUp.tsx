@@ -20,9 +20,9 @@ import { Input } from "@components/Input";
 import { Select } from "@components/Select";
 import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
 import { formatDate, onlyLegalAge } from "@utils/dateTools";
-import { apiMultiForm } from "@services/api";
-import { Alert } from "react-native";
+import { api, apiMultiForm } from "@services/api";
 import { AppError } from "@utils/AppError";
+import { format, formatISO9075 } from "date-fns";
 
 type FormDataProps = {
   name: string;
@@ -51,19 +51,43 @@ export function SignUp() {
   const maximumDate = onlyLegalAge();
 
   const handleSignUp = async (data: FormDataProps) => {
-    const { name, email } = data;
-    const companyId = "5febdb73193b";
+    const { name, email, gender, born } = data;
+    const companyId = "";
 
-    const formData = new FormData();
-    formData.append("email", email);
-    formData.append("name", name);
-    formData.append("companyId", companyId);
+    const newData = {
+      name: name,
+      email: email,
+    };
+
+    if (!!gender) {
+      Object.assign(newData, {
+        gender: gender,
+      });
+    }
+
+    if (born) {
+      Object.assign(newData, {
+        born_date: formatISO9075(new Date(born)),
+      });
+    }
+
+    if (companyId) {
+      Object.assign(newData, {
+        company_id: companyId,
+      });
+    }
+
+    console.log(newData);
 
     try {
-      const response = await apiMultiForm.post("/clients/new_app", formData);
+      const response = await apiMultiForm.post("clients/new_app", newData);
+      const { status } = response?.data;
 
-      const title =
-        response.data.status === "SUCCESS" && response.data.status_txt;
+      let title = "";
+
+      if (status === "SUCCESS")
+        title =
+          "Cadastro realizado com sucesso!\n Você receberá um email com a sua senha de acesso!";
 
       if (!!title) {
         toast.show({

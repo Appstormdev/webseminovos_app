@@ -21,7 +21,7 @@ export function PromoDetail() {
 
   const handleFavoring = () => {
     const originalOfferData = offers.find(
-      (item) => item.id === selectedOffer?.id
+      (item) => item.offer.offer_id === selectedOffer?.offer.offer_id
     );
     if (originalOfferData) handleFavorited(originalOfferData);
   };

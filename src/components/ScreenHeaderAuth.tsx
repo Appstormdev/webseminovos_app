@@ -1,4 +1,4 @@
-import { Button, HStack, Icon, Image, Text } from "native-base";
+import { HStack, Icon, Image } from "native-base";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import Logo from "@assets/wsn_logo.png";

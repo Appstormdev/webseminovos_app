@@ -33,12 +33,12 @@ export function OffersScreen({ handleOpenPromo }: OffersScreenProps) {
 
   function loadOffers() {
     if (offers) {
-      const auxPromos = offers.map((offer) => {
+      const auxPromos = offers.map(({ offer }) => {
         const promo: IPromoProps = {
-          title: offer.titulo_oferta,
-          description: offer.descricao_oferta,
-          promoId: offer.id,
-          imageUrl: offer.imagem_oferta,
+          title: offer.offer_titulo,
+          description: offer.offer_descricao,
+          promoId: offer.offer_id,
+          imageUrl: offer.offer_imagem,
         };
 
         return promo;

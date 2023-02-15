@@ -1,13 +1,10 @@
 import {
-  Box,
   Center,
   CheckIcon,
   FormControl,
-  HStack,
   Select as NativeBaseSelect,
-  Text,
 } from "native-base";
-import { ComponentProps, ReactNode, useState } from "react";
+import { ComponentProps, ReactNode } from "react";
 import { FormFieldHeader } from "./FormFieldHeader";
 
 interface SelectProps extends ComponentProps<typeof NativeBaseSelect> {

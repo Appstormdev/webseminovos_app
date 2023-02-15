@@ -1,5 +1,5 @@
-import { Center, Heading, HStack, Image } from "native-base";
-import { useState } from "react";
+import { Heading, HStack, Image } from "native-base";
+
 import Logo from "@assets/wsn_logo.png";
 
 interface ScreenHeaderProps {

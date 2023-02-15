@@ -1,10 +1,7 @@
 import {
   Input as NativeBaseInput,
   IInputProps,
-  Text,
-  Box,
   VStack,
-  HStack,
   FormControl,
 } from "native-base";
 import { FormFieldHeader } from "./FormFieldHeader";

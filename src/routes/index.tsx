@@ -1,14 +1,16 @@
+import { useEffect, useState } from "react";
 import { Linking, Platform } from "react-native";
 import {
   NavigationContainer,
   useNavigationContainerRef,
 } from "@react-navigation/native";
 
+import { Loading } from "@components/Loading";
 import { useAuth } from "@hooks/useAuth";
+
 import { AuthRoutes } from "./auth.routes";
 import { AppRoutes } from "./app.routes";
-import { useEffect, useState } from "react";
-import { Loading } from "@components/Loading";
+
 import {
   getStoragePersistence,
   saveStoragePersistence,
@@ -72,7 +74,6 @@ export function Routes() {
       ref={navigationRef}
       initialState={initialState}
       onStateChange={async (state) => {
-        console.log("save:", state);
         await saveStoragePersistence(state);
       }}
     >
