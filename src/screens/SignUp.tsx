@@ -77,8 +77,6 @@ export function SignUp() {
       });
     }
 
-    console.log(newData);
-
     try {
       const response = await apiMultiForm.post("clients/new_app", newData);
       const { status } = response?.data;
