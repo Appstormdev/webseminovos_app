@@ -23,6 +23,7 @@ import { PromoCardDetailTechnicalFeaturesField } from "./PromoCardDetailTechnica
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import { useOffers } from "@hooks/useOffers";
 import { useAuth } from "@hooks/useAuth";
+import { useEffect } from "react";
 
 interface PromoDetailProps {
   onHandleGoBack: () => void;
@@ -52,7 +53,9 @@ export function PromoDetailScreen({
 
         <HStack justifyContent="space-between" alignItems="center" mb={2}>
           <Image
-            source={{ uri: item.company.companyLogo }}
+            source={{
+              uri: item.company.companyLogo.replace("localhost", "192.168.0.5"),
+            }}
             fallbackElement={<NotFoundedLogo />}
             alt="Imagem da logo da empresa"
             w="96px"
@@ -77,7 +80,12 @@ export function PromoDetailScreen({
           <Box rounded="md" overflow="hidden" shadow={2}>
             <AspectRatio w="100%" ratio={16 / 9}>
               <Image
-                source={{ uri: item.offer.offerImage }}
+                source={{
+                  uri: item.offer.offerImage.replace(
+                    "localhost",
+                    "192.168.0.5"
+                  ),
+                }}
                 fallbackElement={<NotFoundedCarImageCover />}
                 alt="Imagem do carro em oferta"
                 rounded="lg"
