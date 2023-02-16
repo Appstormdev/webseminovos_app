@@ -1,16 +1,6 @@
 import { useState, useEffect } from "react";
 import { TouchableOpacity } from "react-native";
-import {
-  Center,
-  VStack,
-  Text,
-  IconButton,
-  Icon,
-  ScrollView,
-  Heading,
-  useToast,
-} from "native-base";
-import { Feather } from "@expo/vector-icons";
+import { Center, VStack, Text, ScrollView, useToast } from "native-base";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 
@@ -25,30 +15,79 @@ import { formatDate, onlyLegalAge } from "@utils/dateTools";
 import { useAuth } from "@hooks/useAuth";
 import UserPhotoDefault from "@assets/userPhotoDefault.png";
 
+//NEW 22:25
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { AppError } from "@utils/AppError";
+import { isValid, parseISO } from "date-fns";
+
+type FormDataProps = {
+  name: string;
+  gender: string;
+  phone: string;
+  born: Date;
+};
+
+const updateProfileSchema = yup.object().shape(
+  {
+    name: yup.string().required("Informe seu nome"),
+    gender: yup
+      .mixed()
+      .nullable(true)
+      .notRequired()
+      .when("gender", {
+        is: (value: string) => value?.length,
+        then: (rule) => rule.oneOf(["male", "female", "other", "none"]),
+      }),
+    phone: yup
+      .string()
+      .nullable(true)
+      .notRequired()
+      .when("phone", {
+        is: (value: string) => value?.length,
+        then: (rule) => rule.min(11, "Informe seu numero de celular com DDD."),
+      }),
+    born: yup
+      .date()
+      .nullable()
+      .transform((_, val) => (val instanceof Date ? val : null)),
+  },
+  [
+    ["gender", "gender"],
+    ["phone", "phone"],
+    ["born", "born"],
+  ]
+);
+
 export function Profile() {
-  const { user, handleChangeAvatar } = useAuth();
+  const { user, handleChangeAvatar, updateProfile } = useAuth();
   const [photoIsLoading, setPhotoIsLoading] = useState<boolean>(false);
   const [userPhoto, setUserPhoto] = useState<string>(user.avatarUrl);
 
   const toast = useToast();
 
-  const [password, setPassword] = useState<string>();
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<FormDataProps>({
+    resolver: yupResolver(updateProfileSchema),
+  });
 
-  const [bornDate, setBornDate] = useState<Date>();
-  const [gender, setGender] = useState<string>();
-  const [name, setName] = useState<string>();
-  const [phone, setPhone] = useState<string>();
-  const [newPassword, setNewPassword] = useState<string>();
-  const [securyPassword, setSecuryPassword] = useState<boolean>(true);
+  useEffect(() => {
+    console.log(errors);
+  }, [errors]);
 
   const maximumDate = onlyLegalAge();
 
   useEffect(() => {
     if (user) {
-      setName(user.name);
-      setBornDate(new Date(user.born));
-      setGender(user.gender);
-      setPhone(user.phone);
+      setValue("name", user.name);
+      setValue("born", new Date(parseISO(user.born)));
+      setValue("gender", user.gender);
+      setValue("phone", user.phone);
     }
   }, []);
 
@@ -72,9 +111,9 @@ export function Profile() {
         );
 
         const photoSizeInMb = photoInfo.size && photoInfo.size / 1024 / 1024;
-        if (photoSizeInMb && photoSizeInMb > 2) {
+        if (photoSizeInMb && photoSizeInMb > 1.5) {
           return toast.show({
-            title: "Essa imagem é muito grande.\n Escolha uma de até 2MB",
+            title: "Essa imagem é muito grande.\n Escolha uma de até 1.5MB",
             placement: "top",
             bgColor: "red.400",
             _title: {
@@ -86,12 +125,41 @@ export function Profile() {
           });
         }
         setUserPhoto(photoSelected.assets[0].uri);
-        handleChangeAvatar(photoSelected.assets[0].uri);
+        handleChangeAvatar({
+          imageUri: photoSelected.assets[0].uri,
+          clientId: user.id,
+        });
       }
     } catch (error) {
       console.error(error);
     } finally {
       setPhotoIsLoading(false);
+    }
+  };
+
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+
+  const handleUpdate = async (data: FormDataProps) => {
+    console.log(data.born);
+    try {
+      setIsSaving(true);
+      await updateProfile(data);
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+
+      const title = isAppError
+        ? error.message
+        : "Não foi possível atualizar os seus dados. Tente novamente mais tarde!";
+
+      setIsSaving(false);
+
+      toast.show({
+        title,
+        placement: "top",
+        bgColor: "error.500",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -121,14 +189,22 @@ export function Profile() {
               </Text>
             </TouchableOpacity>
 
-            <Input
-              label="Nome"
-              placeholder="Nome"
-              value={name}
-              autoCapitalize="none"
-              variant="outline"
-              type="text"
-              onChangeText={(value) => setName(value)}
+            <Controller
+              control={control}
+              name="name"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Nome"
+                  placeholder="Nome"
+                  autoCapitalize="none"
+                  variant="outline"
+                  value={value}
+                  type="text"
+                  onChangeText={onChange}
+                  errorMsg={errors?.name?.message}
+                  isRequired
+                />
+              )}
             />
 
             <Input
@@ -141,130 +217,92 @@ export function Profile() {
               type="text"
             />
 
-            <Input
-              label="Telefone"
-              placeholder="Telefone"
-              value={phone}
-              textContentType="telephoneNumber"
-              variant="outline"
-              type="text"
-              onChangeText={(value) => setName(value)}
-            />
-
-            <Datepicker
-              onConfirm={(date) => setBornDate(date)}
-              date={maximumDate}
-              label="Data de nascimento (opcional)"
-              buttonTitle={
-                bornDate ? formatDate(bornDate) : "Clique para selecionar"
-              }
-              locale="pt-BR"
-              mode="date"
-              cancelText="Cancelar"
-              title="Selecione sua data de nascimento"
-              confirmText="Confirmar"
-              maximumDate={maximumDate}
-            />
-
-            <Select.Root
-              label="Gênero (opcional)"
-              selectedValue={gender}
-              onValueChange={(itemValue) => setGender(itemValue)}
-              txtColor="gray.100"
-            >
-              <Select.Item
-                label="Masculino"
-                value="male"
-                _text={{
-                  color: `${gender === "male" ? "gray.100" : "gray.700"}`,
-                }}
-              />
-              <Select.Item
-                label="Feminino"
-                value="female"
-                _text={{
-                  color: `${gender === "female" ? "gray.100" : "gray.700"}`,
-                }}
-              />
-              <Select.Item
-                label="Outro"
-                value="other"
-                _text={{
-                  color: `${gender === "other" ? "gray.100" : "gray.700"}`,
-                }}
-              />
-              <Select.Item
-                label="Prefiro não dizer"
-                value="none"
-                _text={{
-                  color: `${gender === "none" ? "gray.100" : "gray.700"}`,
-                }}
-              />
-            </Select.Root>
-
-            <Heading
-              fontSize="md"
-              fontFamily="heading"
-              textAlign="left"
-              color="gray.100"
-              w="full"
-              mb={2}
-            >
-              Alterar senha
-            </Heading>
-
-            <Input
-              label="Senha antiga"
-              placeholder="Senha antiga"
-              variant="outline"
-              type="password"
-              secureTextEntry={securyPassword}
-              rightElement={
-                <IconButton
-                  icon={
-                    securyPassword ? (
-                      <Icon as={Feather} name="eye" size={4} color="gray.300" />
-                    ) : (
-                      <Icon
-                        as={Feather}
-                        name="eye-off"
-                        size={4}
-                        color="gray.300"
-                      />
-                    )
-                  }
-                  onPress={() => setSecuryPassword(!securyPassword)}
+            <Controller
+              control={control}
+              name="phone"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Telefone"
+                  placeholder="Telefone"
+                  value={value}
+                  keyboardType="phone-pad"
+                  textContentType="telephoneNumber"
+                  variant="outline"
+                  type="text"
+                  onChangeText={onChange}
+                  errorMsg={errors?.phone?.message}
                 />
-              }
-              onChangeText={(value) => setPassword(value)}
+              )}
             />
-            <Input
-              label="Nova senha"
-              placeholder="Nova senha"
-              variant="outline"
-              type="password"
-              secureTextEntry={securyPassword}
-              rightElement={
-                <IconButton
-                  icon={
-                    securyPassword ? (
-                      <Icon as={Feather} name="eye" size={4} color="gray.300" />
-                    ) : (
-                      <Icon
-                        as={Feather}
-                        name="eye-off"
-                        size={4}
-                        color="gray.300"
-                      />
-                    )
+
+            <Controller
+              control={control}
+              name="born"
+              render={({ field: { onChange, value } }) => (
+                <Datepicker
+                  onConfirm={onChange}
+                  date={maximumDate}
+                  label="Data de nascimento (opcional)"
+                  buttonTitle={
+                    value
+                      ? formatDate(new Date(value))
+                      : "Clique para selecionar"
                   }
-                  onPress={() => setSecuryPassword(!securyPassword)}
+                  locale="pt-BR"
+                  mode="date"
+                  cancelText="Cancelar"
+                  title="Selecione sua data de nascimento"
+                  confirmText="Confirmar"
+                  maximumDate={maximumDate}
                 />
-              }
-              onChangeText={(value) => setNewPassword(value)}
+              )}
             />
+
+            <Controller
+              control={control}
+              name="gender"
+              render={({ field: { onChange, value } }) => (
+                <Select.Root
+                  label="Gênero (opcional)"
+                  selectedValue={value}
+                  onValueChange={onChange}
+                  txtColor="gray.100"
+                >
+                  <Select.Item
+                    label="Masculino"
+                    value="male"
+                    _text={{
+                      color: `${value === "male" ? "gray.100" : "gray.700"}`,
+                    }}
+                  />
+                  <Select.Item
+                    label="Feminino"
+                    value="female"
+                    _text={{
+                      color: `${value === "female" ? "gray.100" : "gray.700"}`,
+                    }}
+                  />
+                  <Select.Item
+                    label="Outro"
+                    value="other"
+                    _text={{
+                      color: `${value === "other" ? "gray.100" : "gray.700"}`,
+                    }}
+                  />
+                  <Select.Item
+                    label="Prefiro não dizer"
+                    value="none"
+                    _text={{
+                      color: `${value === "none" ? "gray.100" : "gray.700"}`,
+                    }}
+                  />
+                </Select.Root>
+              )}
+            />
+
             <Button
               title="Salvar Alterações"
+              onPress={handleSubmit(handleUpdate)}
               _pressed={{
                 bg: "blue.400",
               }}

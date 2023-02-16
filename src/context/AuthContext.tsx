@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useEffect, useState } from "react";
 import jwt_decode from "jwt-decode";
+import * as FileSystem from "expo-file-system";
 
 import {
   saveStorageUser,
@@ -12,10 +13,16 @@ import {
   removeStorageAuthToken,
   saveStorageAuthToken,
 } from "@storage/storageAuthToken";
-import { apiMultiForm } from "@services/api";
-import { formatDistanceToNow, parseJSON } from "date-fns";
+import { apiMultiForm, fetchApi } from "@services/api";
+import {
+  formatDistanceToNow,
+  formatISO9075,
+  parseISO,
+  parseJSON,
+} from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { create } from "yup/lib/Reference";
+import { API_URL } from "@env";
 
 export type UserProps = {
   name: string;
@@ -59,13 +66,19 @@ type IUserLoggedInfo = {
   status: string;
 };
 
+type IUploadAvatar = {
+  imageUri: string;
+  clientId: string;
+};
+
 export type AuthContextDataProps = {
-  user: UserProps;
+  user: IUserLoggedInfo;
   userToken: string;
-  isLoadingUserToken: boolean;
+  isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  handleChangeAvatar: (avatarUrl: string) => void;
+  updateProfile: (data: IUpdateProfile) => Promise<void>;
+  handleChangeAvatar: (data: IUploadAvatar) => Promise<void>;
   handleFavorited: (offer: IOffersDTO) => void;
   favorites: IOffersDTO[];
   getFavoritedList: () => IFavorite[];
@@ -76,20 +89,67 @@ type AuthContextProviderProps = {
   children: ReactNode;
 };
 
+type IUpdateProfile = {
+  name: string;
+  phone?: string;
+  gender?: string;
+  born?: Date;
+};
+
 export const AuthContext = createContext<AuthContextDataProps>(
   {} as AuthContextDataProps
 );
 
-//TODO: remover ao integrar com o backend
-let tokenTest = "apenasUmTesteDeToken";
+export let CLIENT_TOKEN = "";
 
 export function AuthContextProvider({ children }: AuthContextProviderProps) {
-  const [user, setUser] = useState<UserProps>({} as UserProps);
+  const [user, setUser] = useState<IUserLoggedInfo>({} as IUserLoggedInfo);
   const [userToken, setUserToken] = useState<string>("");
-  const [isLoadingUserToken, setIsLoadingUserToken] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [favorites, setFavorites] = useState<IOffersDTO[]>([]);
 
-  async function updateUserAndToken(userData: UserProps, token: string) {
+  async function updateProfile(data: IUpdateProfile): Promise<void> {
+    try {
+      console.log("chegou", data?.born ? formatISO9075(data.born) : null);
+      const companyId = "";
+
+      const newData = {
+        id_: user.id,
+        email: user.email,
+        name: data.name,
+        born_date: data?.born ? formatISO9075(data.born) : null,
+        gender: data?.gender ? data.gender : null,
+        telephone: data?.phone ? data.phone : null,
+        company_id: companyId,
+      };
+      setIsLoading(true);
+      await fetchApi({
+        url: "clients/update",
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: newData,
+        onError: (err) => {
+          console.log(err);
+        },
+        onSuccess: async (res) => {
+          console.log("[UPDATE SUCCESS] ==>>", res);
+
+          if (res.status === "SUCCESS")
+            setUser({
+              ...user,
+              name: data.name,
+              born: data.born ? formatISO9075(data.born) : "",
+              gender: data.gender ? data.gender : "",
+              phone: data.phone ? data.phone : "",
+            });
+        },
+      });
+    } catch (error) {}
+  }
+
+  async function updateUserAndToken(userData: IUserLoggedInfo, token: string) {
     //TODO: Atualizar o cabeçalho da requisição backend
     setUser(userData);
     setUserToken(token);
@@ -97,14 +157,14 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
 
   async function saveStorageUserAndToken(userData: UserProps, token: string) {
     try {
-      setIsLoadingUserToken(true);
+      setIsLoading(true);
 
       await saveStorageUser(userData);
       await saveStorageAuthToken(token);
     } catch (error) {
       throw error;
     } finally {
-      setIsLoadingUserToken(false);
+      setIsLoading(false);
     }
   }
 
@@ -119,7 +179,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
 
   function clearAllState() {
     try {
-      setUser({} as UserProps);
+      setUser({} as IUserLoggedInfo);
       setUserToken("");
       setFavorites([] as IOffersDTO[]);
     } catch (error) {
@@ -129,20 +189,20 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
 
   async function logout() {
     try {
-      setIsLoadingUserToken(true);
+      setIsLoading(true);
 
       await removeStorageUserAndToken();
       clearAllState();
     } catch (error) {
       throw error;
     } finally {
-      setIsLoadingUserToken(false);
+      setIsLoading(false);
     }
   }
 
   async function signIn(email: string, password: string) {
     try {
-      setIsLoadingUserToken(true);
+      setIsLoading(true);
       const loginData = {
         email: email,
         password: password,
@@ -188,17 +248,17 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
           console.info("[LOGGED] ===>> ", userLogged, user_token);
         }
       }
-      if (!!response) setIsLoadingUserToken(false);
+      if (!!response) setIsLoading(false);
     } catch (error) {
       throw error;
     } finally {
-      setIsLoadingUserToken(false);
+      setIsLoading(false);
     }
   }
 
   async function loadUserData() {
     try {
-      setIsLoadingUserToken(true);
+      setIsLoading(true);
 
       const userLogged = await getStorageUser();
       const token = await getStorageAuthToken();
@@ -209,7 +269,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     } catch (error) {
       throw error;
     } finally {
-      setIsLoadingUserToken(false);
+      setIsLoading(false);
     }
   }
 
@@ -217,13 +277,38 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     loadUserData();
   }, []);
 
-  function handleChangeAvatar(avatarUrl: string) {
-    let updatedUser: UserProps;
+  async function handleChangeAvatar({
+    imageUri,
+    clientId,
+  }: IUploadAvatar): Promise<void> {
+    let updatedUser: IUserLoggedInfo;
+
+    try {
+      const response = await FileSystem.uploadAsync(
+        API_URL.concat("clients/upload_pic"),
+        imageUri,
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+          uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+          fieldName: "upload_file",
+          mimeType: "image/jpeg",
+          httpMethod: "POST",
+          parameters: {
+            id: clientId,
+          },
+        }
+      );
+      const { status } = response;
+      if (status === 200) {
+      }
+    } catch (error) {}
 
     if (user) {
       updatedUser = {
         ...user,
-        avatarUrl,
+        avatarUrl: imageUri,
       };
 
       setUser(updatedUser);
@@ -272,8 +357,9 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         user,
         signIn,
         userToken,
-        isLoadingUserToken,
+        isLoading,
         logout,
+        updateProfile,
         handleChangeAvatar,
         handleFavorited,
         favorites,
