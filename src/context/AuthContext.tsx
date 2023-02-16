@@ -14,14 +14,8 @@ import {
   saveStorageAuthToken,
 } from "@storage/storageAuthToken";
 import { apiMultiForm, fetchApi } from "@services/api";
-import {
-  formatDistanceToNow,
-  formatISO9075,
-  parseISO,
-  parseJSON,
-} from "date-fns";
+import { formatDistanceToNow, formatISO9075, parseJSON } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { create } from "yup/lib/Reference";
 import { API_URL } from "@env";
 
 export type UserProps = {
@@ -110,7 +104,6 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
 
   async function updateProfile(data: IUpdateProfile): Promise<void> {
     try {
-      console.log("chegou", data?.born ? formatISO9075(data.born) : null);
       const companyId = "";
 
       const newData = {
