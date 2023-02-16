@@ -23,7 +23,6 @@ import { PromoCardDetailTechnicalFeaturesField } from "./PromoCardDetailTechnica
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import { useOffers } from "@hooks/useOffers";
 import { useAuth } from "@hooks/useAuth";
-import { useEffect } from "react";
 
 interface PromoDetailProps {
   onHandleGoBack: () => void;
