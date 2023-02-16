@@ -1,8 +1,8 @@
-import { UserProps } from "@context/AuthContext";
+import { IUserLoggedInfo } from "@context/AuthContext";
 import { useStorage } from "@hooks/useStorage";
 import { USER_STORAGE } from "./storageConfig";
 
-export const saveStorageUser = async (user: UserProps) => {
+export const saveStorageUser = async (user: IUserLoggedInfo) => {
   const { saveStorageData } = useStorage();
   await saveStorageData({ key: USER_STORAGE, value: user });
 };

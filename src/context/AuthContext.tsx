@@ -53,7 +53,7 @@ type IUserInfoDTO = {
   client_id: string;
 };
 
-type IUserLoggedInfo = {
+export type IUserLoggedInfo = {
   avatarUrl: string;
   born: string;
   clientFor: string;
@@ -155,7 +155,10 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     setUserToken(token);
   }
 
-  async function saveStorageUserAndToken(userData: UserProps, token: string) {
+  async function saveStorageUserAndToken(
+    userData: IUserLoggedInfo,
+    token: string
+  ) {
     try {
       setIsLoading(true);
 
