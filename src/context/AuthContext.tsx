@@ -45,6 +45,7 @@ type IUserInfoDTO = {
   client_avatar: string;
   client_gender: string;
   client_id: string;
+  client_favorites: string;
 };
 
 export type IUserLoggedInfo = {
@@ -58,6 +59,7 @@ export type IUserLoggedInfo = {
   name: string;
   phone: string;
   status: string;
+  favorites: IOffersDTO[];
 };
 
 type IUploadAvatar = {
@@ -71,7 +73,7 @@ export type AuthContextDataProps = {
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  updateProfile: (data: IUpdateProfile) => Promise<void>;
+  updateProfile: (data: IUpdateProfile) => Promise<boolean>;
   handleChangeAvatar: (data: IUploadAvatar) => Promise<void>;
   handleFavorited: (offer: IOffersDTO) => void;
   favorites: IOffersDTO[];
@@ -83,7 +85,7 @@ type AuthContextProviderProps = {
   children: ReactNode;
 };
 
-type IUpdateProfile = {
+export type IUpdateProfile = {
   name: string;
   phone?: string;
   gender?: string;
@@ -102,7 +104,9 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [favorites, setFavorites] = useState<IOffersDTO[]>([]);
 
-  async function updateProfile(data: IUpdateProfile): Promise<void> {
+  async function updateProfile(data: IUpdateProfile): Promise<boolean> {
+    setIsLoading(true);
+    let response: boolean = false;
     try {
       const companyId = "";
 
@@ -110,26 +114,46 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         id_: user.id,
         email: user.email,
         name: data.name,
-        born_date: data?.born ? formatISO9075(data.born) : null,
-        gender: data?.gender ? data.gender : null,
-        telephone: data?.phone ? data.phone : null,
         company_id: companyId,
       };
-      setIsLoading(true);
+
+      if (data.born)
+        Object.assign(newData, {
+          ...newData,
+          born_date: formatISO9075(data.born),
+        });
+
+      if (data.gender)
+        Object.assign(newData, {
+          ...newData,
+          gender: data.gender,
+        });
+
+      if (data.phone)
+        Object.assign(newData, {
+          ...newData,
+          telephone: data.phone,
+        });
+
+      if (user.favorites)
+        Object.assign(newData, {
+          ...newData,
+          favorites: JSON.stringify(user.favorites),
+        });
+
       await fetchApi({
-        url: "clients/update",
+        url: "clients/update_app_v1",
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",
         },
         body: newData,
         onError: (err) => {
-          console.log(err);
+          console.log("[FETCH ON ERROR PROFILE]", err);
         },
         onSuccess: async (res) => {
-          console.log("[UPDATE SUCCESS] ==>>", res);
-
-          if (res.status === "SUCCESS")
+          console.log("[FETCH UPDATE PROFILE]", res);
+          if (res.status === "SUCCESS") {
             setUser({
               ...user,
               name: data.name,
@@ -137,9 +161,19 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
               gender: data.gender ? data.gender : "",
               phone: data.phone ? data.phone : "",
             });
+            response = true;
+          } else {
+            response = false;
+          }
         },
       });
-    } catch (error) {}
+      setIsLoading(false);
+      return response;
+    } catch (error) {
+    } finally {
+      setIsLoading(false);
+      return response;
+    }
   }
 
   async function updateUserAndToken(userData: IUserLoggedInfo, token: string) {
@@ -196,7 +230,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     }
   }
 
-  async function signIn(email: string, password: string) {
+  async function signIn(email: string, password: string): Promise<void> {
     try {
       setIsLoading(true);
       const loginData = {
@@ -204,7 +238,10 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         password: password,
       };
 
-      const response = await apiMultiForm.post(`auth/login_client`, loginData);
+      const response = await apiMultiForm.post(
+        `auth/login_client_app_v1`,
+        loginData
+      );
 
       const { status, user_token } = response.data;
 
@@ -221,8 +258,9 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
           client_avatar,
           client_gender,
           client_id,
+          client_favorites,
         } = userInfo as IUserInfoDTO;
-        //TODO: remove replace from avatar when production
+        //TODO: remove replace url from avatar when production
         const userLogged: IUserLoggedInfo = {
           id: client_id,
           name: client_name,
@@ -236,12 +274,17 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
           status: client_status,
           fromCompany: client_company_id,
           avatarUrl: client_avatar.replace("localhost", "192.168.0.5"),
+          favorites:
+            client_favorites !== ""
+              ? JSON.parse(client_favorites)
+              : ([] as IOffersDTO[]),
         };
 
         if (!!userLogged) {
           await saveStorageUserAndToken(userLogged, user_token);
           await updateUserAndToken(userLogged, user_token);
-          console.info("[LOGGED] ===>> ", userLogged, user_token);
+          setFavorites(userLogged.favorites);
+          // console.info("[LOGGED] ===>> ", userLogged, user_token);
         }
       }
       if (!!response) setIsLoading(false);
@@ -281,7 +324,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
 
     try {
       const response = await FileSystem.uploadAsync(
-        API_URL.concat("clients/upload_pic"),
+        API_URL.concat("clients/update_avatar_app_v1"),
         imageUri,
         {
           headers: {
@@ -311,6 +354,62 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
     }
   }
 
+  async function updateFavorites(favorites: IOffersDTO[]) {
+    const newData = {
+      id_: user.id,
+      email: user.email,
+      name: user.name,
+      favorites: JSON.stringify(favorites),
+    };
+
+    if (user.born)
+      Object.assign(newData, {
+        ...newData,
+        born_date: user.born,
+      });
+
+    if (user.gender)
+      Object.assign(newData, {
+        ...newData,
+        gender: user.gender,
+      });
+
+    if (user.phone)
+      Object.assign(newData, {
+        ...newData,
+        telephone: user.phone,
+      });
+
+    if (user.fromCompany)
+      Object.assign(newData, {
+        ...newData,
+        company_id: user.fromCompany,
+      });
+
+    try {
+      await fetchApi({
+        url: "clients/update_app_v1",
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: newData,
+        onError: (err) => {
+          console.log("[UPDATE FAVORITES ERROR]", err);
+        },
+        onSuccess: async (res) => {
+          if (res.status === "SUCCESS")
+            setUser({
+              ...user,
+              favorites,
+            });
+        },
+      });
+    } catch (error) {
+      console.log("[CATCH UPDATE FAVORITES ERROR]", error);
+    }
+  }
+
   function handleFavorited(offerToFavorite: IOffersDTO) {
     const hasFavorited = !!favorites.find(
       (item) => item.offer.offer_id === offerToFavorite.offer.offer_id
@@ -321,9 +420,12 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         (item) => item.offer.offer_id !== offerToFavorite.offer.offer_id
       );
       setFavorites(filteredFavorites);
+
+      updateFavorites(filteredFavorites);
     }
     if (!hasFavorited) {
       setFavorites([...favorites, offerToFavorite]);
+      updateFavorites([...favorites, offerToFavorite]);
     }
   }
 
@@ -341,10 +443,13 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
   }
 
   function thisOfferIsFavorited(offerId: string): boolean {
-    const isFavorited = !!favorites.find(
-      (item) => item.offer.offer_id === offerId
-    );
-    return isFavorited;
+    if (favorites.length > 0) {
+      const isFavorited = !!favorites.find(
+        (item) => item.offer.offer_id === offerId
+      );
+      return isFavorited;
+    }
+    return false;
   }
 
   return (

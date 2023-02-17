@@ -20,13 +20,16 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { AppError } from "@utils/AppError";
-import { isValid, parseISO } from "date-fns";
+import { parseISO } from "date-fns";
+import { IUpdateProfile } from "@context/AuthContext";
+import { useNavigation } from "@react-navigation/native";
+import { AppNavigatorRoutesProps } from "@routes/app.routes";
 
 type FormDataProps = {
   name: string;
   gender: string;
   phone: string;
-  born: Date;
+  born: Date | null;
 };
 
 const updateProfileSchema = yup.object().shape(
@@ -50,7 +53,8 @@ const updateProfileSchema = yup.object().shape(
       }),
     born: yup
       .date()
-      .nullable()
+      .nullable(true)
+      .notRequired()
       .transform((_, val) => (val instanceof Date ? val : null)),
   },
   [
@@ -61,9 +65,11 @@ const updateProfileSchema = yup.object().shape(
 );
 
 export function Profile() {
-  const { user, handleChangeAvatar, updateProfile } = useAuth();
+  const { user, handleChangeAvatar, updateProfile, isLoading } = useAuth();
   const [photoIsLoading, setPhotoIsLoading] = useState<boolean>(false);
   const [userPhoto, setUserPhoto] = useState<string>(user.avatarUrl);
+
+  const navigation = useNavigation<AppNavigatorRoutesProps>();
 
   const toast = useToast();
 
@@ -77,7 +83,7 @@ export function Profile() {
   });
 
   useEffect(() => {
-    console.log(errors);
+    if (!!errors) console.log("[PROFILE FORM ERROR]", errors);
   }, [errors]);
 
   const maximumDate = onlyLegalAge();
@@ -85,7 +91,10 @@ export function Profile() {
   useEffect(() => {
     if (user) {
       setValue("name", user.name);
-      setValue("born", new Date(parseISO(user.born)));
+      setValue(
+        "born",
+        user.born !== null ? new Date(parseISO(user.born)) : null
+      );
       setValue("gender", user.gender);
       setValue("phone", user.phone);
     }
@@ -137,13 +146,52 @@ export function Profile() {
     }
   };
 
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-
   const handleUpdate = async (data: FormDataProps) => {
-    console.log(data.born);
+    const newData: IUpdateProfile = {
+      name: data.name,
+    };
+
+    if (data.born)
+      Object.assign(newData, {
+        ...newData,
+        born: data.born,
+      });
+
+    if (data.gender)
+      Object.assign(newData, {
+        ...newData,
+        gender: data.gender,
+      });
+
+    if (data.phone)
+      Object.assign(newData, {
+        ...newData,
+        phone: data.phone,
+      });
+
     try {
-      setIsSaving(true);
-      await updateProfile(data);
+      const hasUpdated = await updateProfile(newData);
+      if (hasUpdated) {
+        const title = "Seus dados foram atualizados com sucesso!";
+
+        toast.show({
+          title,
+          placement: "top",
+          bgColor: "green.500",
+        });
+
+        navigation.navigate("home");
+      } else {
+        console.log(hasUpdated);
+        const title =
+          "Não foi possível atualizar os seus dados. Tente novamente mais tarde! 2";
+
+        toast.show({
+          title,
+          placement: "top",
+          bgColor: "error.500",
+        });
+      }
     } catch (error) {
       const isAppError = error instanceof AppError;
 
@@ -151,15 +199,11 @@ export function Profile() {
         ? error.message
         : "Não foi possível atualizar os seus dados. Tente novamente mais tarde!";
 
-      setIsSaving(false);
-
       toast.show({
         title,
         placement: "top",
         bgColor: "error.500",
       });
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -244,7 +288,7 @@ export function Profile() {
                   date={maximumDate}
                   label="Data de nascimento (opcional)"
                   buttonTitle={
-                    value
+                    value !== null
                       ? formatDate(new Date(value))
                       : "Clique para selecionar"
                   }
@@ -303,6 +347,8 @@ export function Profile() {
             <Button
               title="Salvar Alterações"
               onPress={handleSubmit(handleUpdate)}
+              isLoading={isLoading}
+              disabled={isLoading}
               _pressed={{
                 bg: "blue.400",
               }}

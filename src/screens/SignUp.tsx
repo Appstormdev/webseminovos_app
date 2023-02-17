@@ -78,7 +78,7 @@ export function SignUp() {
     }
 
     try {
-      const response = await apiMultiForm.post("clients/new_app", newData);
+      const response = await apiMultiForm.post("clients/new_app_v1", newData);
       const { status } = response?.data;
 
       let title = "";

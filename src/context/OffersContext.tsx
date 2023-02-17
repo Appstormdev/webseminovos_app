@@ -4,11 +4,14 @@ import { IOffersDTO } from "@dtos/OffersDTO";
 import { api } from "@services/api";
 import { getStorageOffers, saveStorageOffers } from "@storage/storageOffers";
 import { getFullAddress } from "@utils/addressTools";
+import { saveStorageUser } from "@storage/storageUser";
+import { IUserLoggedInfo } from "./AuthContext";
 
 export type OffersContextDataProps = {
   offers: IOffersDTO[];
   selectedOffer: IOffersDTO;
   offer: OfferType;
+  loadFavoritesOffers: (favorites: string[]) => Promise<IOffersDTO[]>;
   fetchSearchOffers: (term: string) => Promise<void>;
   selectOffer: (offerId: string) => void;
   loadOffer: () => void;
@@ -124,7 +127,9 @@ export function OffersContextProvider({
 
   async function fetchSearchOffers(term: string) {
     try {
-      const response = await api.get(`company/all_by_marca?title=${term}`);
+      const response = await api.get(
+        `company/all_by_marca_app_v1?title=${term}`
+      );
 
       const { data } = response?.data;
 
@@ -145,10 +150,26 @@ export function OffersContextProvider({
     } catch (error) {}
   }
 
-  function selectOffer(offerId: string) {
-    const offer = offers.find((item) => item.offer.offer_id === offerId);
+  async function fetchFavorites(id: string) {
+    const favorite = await api.get(`oferta/single_app_v1?id_=${id}`);
+    const { data } = favorite.data;
 
-    if (offer) setSelectedOffer(offer);
+    return data;
+  }
+
+  async function loadFavoritesOffers(favorites: string[]) {
+    const response: IOffersDTO[] = [];
+    for (let i = 0; i < favorites.length; i++) {
+      response.push(await fetchFavorites(favorites[i]));
+    }
+
+    return response;
+  }
+
+  function selectOffer(offerId: string) {
+    const selected = offers.find((item) => item.offer.offer_id === offerId);
+
+    if (selected) setSelectedOffer(selected);
   }
 
   function loadOffer() {
@@ -189,6 +210,7 @@ export function OffersContextProvider({
         selectedOffer,
         offer,
         loadOffer,
+        loadFavoritesOffers,
         fetchSearchOffers,
         selectOffer,
       }}

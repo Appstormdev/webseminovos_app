@@ -27,7 +27,7 @@ export function useStorage() {
         await AsyncStorage.setItem(key, JSON.stringify(value));
       }
 
-      console.info(`[STORAGE DATA SAVED]`, key);
+      // console.info(`[STORAGE DATA SAVED]`, key);
     } catch (error: any) {
       Alert.alert(`[STORAGE SAVE ERROR: ${key}]`, error.message);
     }
@@ -41,7 +41,7 @@ export function useStorage() {
         return jsonValue != null ? jsonValue : null;
       }
 
-      console.info(`[STORAGE DATA RECOVERED]`, key);
+      // console.info(`[STORAGE DATA RECOVERED]`, key);
       return jsonValue != null ? JSON.parse(jsonValue) : null;
     } catch (error: any) {
       Alert.alert(`[STORAGE RECOVER ERROR: ${key}]`, error.message);
@@ -51,7 +51,7 @@ export function useStorage() {
   async function removeStorageData({ key }: IRemoveStorage) {
     try {
       await AsyncStorage.removeItem(key);
-      console.info(`[STORAGE DATA REMOVED]`, key);
+      // console.info(`[STORAGE DATA REMOVED]`, key);
     } catch (error: any) {
       Alert.alert(`[STORAGE REMOVE ERROR: ${key}]`, error.message);
     }
@@ -60,7 +60,7 @@ export function useStorage() {
   async function clearStorageData() {
     try {
       await AsyncStorage.clear();
-      console.info(`[STORAGE DATA CLEANED]`);
+      // console.info(`[STORAGE DATA CLEANED]`);
     } catch (error: any) {
       Alert.alert("[STORAGE CLEAR ERROR]", error.message);
     }

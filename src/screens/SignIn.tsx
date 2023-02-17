@@ -25,6 +25,7 @@ import { Container } from "@components/Container";
 import { Input } from "@components/Input";
 import { useAuth } from "@hooks/useAuth";
 import { AppError } from "@utils/AppError";
+import { useOffers } from "@hooks/useOffers";
 
 type FormDataProps = {
   email: string;
@@ -67,7 +68,7 @@ export function SignIn() {
 
       const title = isAppError
         ? error.message
-        : "Não foi possível criar a conta. Tente novamente mais tarde!";
+        : "Não foi possível realizar o login. Tente novamente mais tarde!";
 
       setIsLoading(false);
 
